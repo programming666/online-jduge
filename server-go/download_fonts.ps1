@@ -3,7 +3,7 @@ $fonts = @(
     @{ Name = "FiraCode"; Url = "https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip" },
     @{ Name = "JetBrainsMono"; Url = "https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip" },
     @{ Name = "Monaspace"; Url = "https://github.com/githubnext/monaspace/releases/download/v1.000/monaspace-v1.000.zip" },
-    @{ Name = "AnonymousPro"; Url = "https://www.marksimonson.com/assets/content/fonts/AnonymousPro-1.002.zip" }
+    @{ Name = "AnonymousPro"; Url = "https://www.fontsquirrel.com/fonts/download/anonymous-pro" }
 )
 
 $destBase = "d:\qinyining.cn Project\online-jduge\server-go\static\fonts"
