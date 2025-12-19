@@ -1,0 +1,465 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "submit": "提交",
+    "cancel": "取消",
+    "confirm": "确认",
+    "edit": "编辑",
+    "delete": "删除",
+    "copy": "复制",
+    "save": "保存",
+    "back": "返回",
+    "search": "搜索",
+    "filter": "筛选",
+    "refresh": "刷新",
+    "unit": {
+      "ms": "ms",
+      "kb": "KB",
+      "mb": "MB",
+      "spaces": "空格"
+    }
+  },
+  "nav": {
+    "title": "在线评测系统",
+    "home": "主页",
+    "problems": "题目",
+    "contest": "比赛",
+    "submissions": "提交记录",
+    "addProblem": "添加题目",
+    "contests": "比赛管理",
+    "settings": "系统设置",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "hi": "你好"
+  },
+  "auth": {
+    "login": {
+      "title": "登录账号",
+      "username": "用户名",
+      "password": "密码",
+      "signIn": "登录",
+      "loginFailed": "登录失败"
+    },
+    "register": {
+      "title": "注册新账号",
+      "username": "用户名",
+      "password": "密码",
+      "role": "角色",
+      "student": "学生",
+      "admin": "管理员",
+      "registerButton": "注册",
+      "registrationFailed": "注册失败"
+    }
+  },
+  "problem": {
+    "list": {
+      "title": "题目列表",
+      "id": "编号",
+      "problemTitle": "标题",
+      "createdAt": "创建时间",
+      "difficulty": "难度",
+      "noProblems": "暂无题目",
+      "searchPlaceholder": "搜索 ID 或标题...",
+      "allDifficulties": "所有难度",
+      "score": "得分"
+    },
+    "detail": {
+      "timeLimit": "时间限制",
+      "memoryLimit": "内存限制",
+      "difficulty": "难度",
+      "description": "题目描述",
+      "codeEditor": "代码编辑器",
+      "submitSolution": "提交代码",
+      "submitting": "提交中...",
+      "submissionFailed": "提交失败",
+      "deleteConfirm": "确定要删除该题目吗？此操作不可撤销，并会删除相关提交。",
+      "deleteFailed": "删除失败",
+      "copyFailed": "复制失败",
+      "writeYourSolution": "// 在此编写你的代码",
+      "diffSame": "相同行数",
+      "diffDifferent": "不同行数"
+    },
+    "add": {
+      "title": "添加新题目",
+      "problemTitle": "题目标题",
+      "description": "题目描述 (Markdown)",
+      "defaultTimeLimit": "默认时间限制 (毫秒)",
+      "memoryLimit": "内存限制 (MB)",
+      "languageSpecific": "语言特定设置",
+      "cppTimeLimit": "C++ 时间限制（可选覆盖）",
+      "pythonTimeLimit": "Python 时间限制（可选覆盖）",
+      "cppCompileOptions": "C++ 编译选项",
+      "testCases": "测试用例",
+      "addCase": "+ 添加用例",
+      "input": "输入",
+      "expectedOutput": "期望输出",
+      "remove": "移除",
+      "createProblem": "创建题目",
+      "errorAdding": "添加题目出错",
+      "tags": "标签",
+      "tagsPlaceholder": "使用逗号分隔多个标签，例如：图论, 动态规划"
+    },
+    "edit": {
+      "title": "编辑题目",
+      "updateProblem": "更新题目",
+      "errorUpdating": "更新题目出错"
+    },
+    "difficulty": {
+      "LEVEL1": "入门",
+      "LEVEL2": "普及-",
+      "LEVEL3": "普及/提高-",
+      "LEVEL4": "普及+/提高",
+      "LEVEL5": "提高+/省选-",
+      "LEVEL6": "省选/NOI-",
+      "LEVEL7": "NOI/NOI+/CSTC"
+    }
+  },
+  "settings": {
+    "title": "系统设置",
+    "registration": {
+      "title": "用户注册开关",
+      "description": "控制是否允许新用户注册账号。关闭后，仅现有用户可以登录。",
+      "enabled": "已启用（允许注册）",
+      "disabled": "已禁用（禁止注册）",
+      "enableConfirm": "确定要开启新用户注册吗？",
+      "disableConfirm": "确定要关闭新用户注册吗？",
+      "updateSuccess": "注册开关更新成功",
+      "updateFailed": "注册开关更新失败"
+    },
+    "homepage": {
+      "title": "主页内容定制",
+      "description": "使用 Markdown 或 HTML 定制系统主页内容。",
+      "placeholder": "在此输入主页内容...",
+      "updateSuccess": "主页内容更新成功",
+      "updateFailed": "主页内容更新失败"
+    },
+    "footer": {
+      "title": "页脚内容定制",
+      "description": "使用 Markdown 或 HTML 定制系统页脚内容。",
+      "placeholder": "在此输入页脚内容...",
+      "updateSuccess": "页脚内容更新成功",
+      "updateFailed": "页脚内容更新失败"
+    },
+    "rateLimit": {
+      "title": "提交速率限制",
+      "description": "设置每个用户每分钟最多可提交的次数。",
+      "label": "每分钟最大提交次数",
+      "updateSuccess": "速率限制更新成功",
+      "updateFailed": "速率限制更新失败"
+    },
+    "userManagement": {
+      "title": "用户管理",
+      "description": "管理系统用户，包括封禁、删除用户等操作。",
+      "searchPlaceholder": "搜索用户名...",
+      "columns": {
+        "id": "ID",
+        "username": "用户名",
+        "role": "角色",
+        "status": "状态",
+        "createdAt": "注册时间",
+        "actions": "操作"
+      },
+      "status": {
+        "active": "正常",
+        "banned": "已封禁"
+      },
+      "actions": {
+        "ban": "封禁",
+        "unban": "解封",
+        "delete": "删除",
+        "deleteWithBanIP": "删除并封禁IP",
+        "clearSubmissions": "清除提交记录",
+        "viewSubmissions": "查看提交"
+      },
+      "banDialog": {
+        "title": "封禁用户",
+        "reason": "封禁原因",
+        "reasonPlaceholder": "请输入封禁原因...",
+        "confirm": "确认封禁"
+      },
+      "confirmDelete": "确定要删除用户 {{username}} 吗？此操作不可撤销。",
+      "confirmDeleteWithBanIP": "确定要删除用户 {{username}} 并封禁其IP地址吗？此操作不可撤销。",
+      "confirmClearSubmissions": "确定要清除用户 {{username}} 的所有提交记录吗？此操作不可撤销。",
+      "confirmUnban": "确定要解封用户 {{username}} 吗？",
+      "success": {
+        "ban": "用户已封禁",
+        "unban": "用户已解封",
+        "delete": "用户已删除",
+        "deleteWithBanIP": "用户已删除，IP已封禁",
+        "clearSubmissions": "提交记录已清除"
+      },
+      "error": {
+        "ban": "封禁失败",
+        "unban": "解封失败",
+        "delete": "删除失败",
+        "deleteWithBanIP": "删除并封禁IP失败",
+        "clearSubmissions": "清除提交记录失败",
+        "load": "加载用户列表失败"
+      },
+      "noUsers": "暂无用户",
+      "bannedReason": "封禁原因",
+      "bannedAt": "封禁时间"
+    },
+    "bannedIPs": {
+      "title": "IP封禁管理",
+      "description": "管理被封禁的IP地址。",
+      "columns": {
+        "ip": "IP地址",
+        "reason": "封禁原因",
+        "bannedAt": "封禁时间",
+        "expiresAt": "过期时间",
+        "actions": "操作"
+      },
+      "permanent": "永久",
+      "unban": "解封",
+      "confirmUnban": "确定要解封IP地址 {{ip}} 吗？",
+      "success": {
+        "unban": "IP已解封"
+      },
+      "error": {
+        "unban": "解封失败",
+        "load": "加载IP封禁列表失败"
+      },
+      "noIPs": "暂无封禁IP"
+    }
+  },
+  "contest": {
+    "list": {
+      "title": "比赛列表",
+      "statusFilter": "状态筛选",
+      "statusLabel": "状态",
+      "status": {
+        "all": "全部状态"
+      },
+      "timeFrom": "开始时间从",
+      "timeTo": "开始时间至",
+      "minParticipants": "最少参与人数",
+      "maxParticipants": "最多参与人数",
+      "pageSize": "每页显示",
+      "view": {
+        "card": "卡片视图",
+        "list": "列表视图"
+      },
+      "noContests": "暂无比赛",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "participants": "参与人数",
+      "name": "比赛名称",
+      "actions": "操作",
+      "join": "参加",
+      "pagination": "第 {{page}} 页 / 共 {{totalPages}} 页",
+      "prev": "上一页",
+      "next": "下一页"
+    },
+    "status": {
+      "upcoming": "即将开始",
+      "ongoing": "进行中",
+      "finished": "已结束"
+    },
+    "password": {
+      "title": "加入比赛: {{name}}",
+      "placeholder": "请输入比赛密码",
+      "show": "显示",
+      "hide": "隐藏",
+      "strength": "密码强度",
+      "strength.weak": "弱",
+      "strength.medium": "中",
+      "strength.strong": "强",
+      "submit": "加入",
+      "error": "加入失败",
+      "remaining": "剩余尝试次数: {{count}}"
+    },
+    "create": {
+      "title": "创建比赛",
+      "name": "比赛名称",
+      "description": "比赛描述",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "rule": "赛制",
+      "submit": "创建比赛",
+      "nameRequired": "比赛名称不能为空",
+      "timeRequired": "必须设置开始和结束时间",
+      "timeInvalid": "结束时间必须晚于开始时间",
+      "ruleRequired": "请选择赛制",
+      "submitConfirm": "确认创建比赛？",
+      "success": "比赛创建成功",
+      "failed": "比赛创建失败",
+      "problemBank": "题库",
+      "select": "选择",
+      "tags": "标签",
+      "tagPlaceholder": "按标签筛选，逗号分隔多个标签"
+    },
+    "edit": {
+      "title": "编辑比赛",
+      "submit": "确认修改",
+      "submitConfirm": "确认保存比赛？",
+      "success": "比赛保存成功",
+      "failed": "比赛保存失败"
+    },
+    "detail": {
+      "backToList": "返回比赛列表",
+      "rule": "比赛规则",
+      "description": "比赛描述",
+      "problems": "题目列表",
+      "viewProblem": "查看题目",
+      "noProblems": "暂无题目",
+      "attachments": "附件",
+      "download": "下载",
+      "noAttachments": "暂无附件"
+    }
+  },
+  "contest.leaderboard": {
+    "title": "比赛排行榜",
+    "rank": "排名",
+    "username": "用户名",
+    "submissions": "提交次数",
+    "score": "得分",
+    "submittedOnly": "已提交",
+    "button": "排行榜"
+  },
+  "submission": {
+    "list": {
+      "title": "提交记录",
+      "id": "编号",
+      "time": "时间",
+      "user": "用户",
+      "problem": "题目",
+      "status": "状态",
+      "timeUsed": "用时",
+      "language": "语言",
+      "noSubmissions": "暂无提交记录",
+      "anonymous": "匿名"
+    },
+    "detail": {
+      "title": "提交详情",
+      "submissionId": "提交编号",
+      "problem": "题目",
+      "user": "用户",
+      "language": "语言",
+      "status": "状态",
+      "timeUsed": "用时",
+      "memoryUsed": "内存使用",
+      "submittedAt": "提交时间",
+      "code": "代码",
+      "output": "输出",
+      "outputInfo": "输出信息",
+      "testResults": "测试结果",
+      "testCase": "测试用例",
+      "input": "输入",
+      "expectedOutput": "期望输出",
+      "actualOutput": "实际输出",
+      "actual": "实际",
+      "expected": "期望",
+      "result": "结果",
+      "passed": "通过",
+      "failed": "失败",
+      "testPoints": "测试点信息",
+      "sourceCode": "源代码",
+      "showDetails": "查看详细输出",
+      "hideDetails": "隐藏详细输出",
+      "backToProblem": "返回题目",
+      "score": "得分",
+      "caseNumber": "测试点",
+      "time": "时间",
+      "memory": "内存",
+      "notFound": "提交未找到"
+    },
+    "status": {
+      "accepted": "通过",
+      "wrongAnswer": "答案错误",
+      "pending": "评测中",
+      "timeLimitExceeded": "超时",
+      "memoryLimitExceeded": "内存超限",
+      "runtimeError": "运行错误",
+      "compileError": "编译错误"
+    }
+  },
+  "language": {
+    "cpp": "C++ (G++ 13+)",
+    "python": "Python 3"
+  },
+  "error": {
+    "404": {
+      "title": "404 - 页面未找到",
+      "description": "您访问的页面不存在。",
+      "backToProblems": "返回题目列表"
+    }
+  },
+  "admin": {
+    "title": "管理面板",
+    "menu": {
+      "problems": "题目管理",
+      "contests": "比赛管理",
+      "settings": "系统设置",
+      "users": "用户管理"
+    },
+    "sidebar": {
+      "collapse": "收起侧边栏",
+      "expand": "展开侧边栏"
+    }
+  }
+  ,
+  "user": {
+    "menu": {
+      "info": "个人信息",
+      "code": "我的代码",
+      "security": "安全设置",
+      "preferences": "偏好设置"
+    },
+    "preferences": {
+      "title": "偏好设置",
+      "theme": "主题设置",
+      "editor": "编辑器设置",
+      "fontFamily": "字体",
+      "fontSize": "字号",
+      "tabSize": "Tab宽度",
+      "indentUnit": "缩进单位",
+      "lineNumbers": "显示行号",
+      "foldGutter": "代码折叠",
+      "matchBrackets": "括号匹配",
+      "themes": {
+        "system": "跟随系统",
+        "light": "浅色模式",
+        "dark": "深色模式"
+      }
+    },
+    "info": {
+      "title": "个人信息",
+      "today": {
+        "total": "今日提交总数",
+        "ac": "今日AC数",
+        "wrong": "今日错误数",
+        "rate": "总体AC率"
+      },
+      "bar": {
+        "title": "最近5个月累计答题柱状图"
+      },
+      "heat": {
+        "title": "做题趋势热度图",
+        "note": "数据非实时更新"
+      }
+    },
+    "code": {
+      "title": "我的代码",
+      "columns": {
+        "time": "提交时间",
+        "problemId": "题目ID",
+        "language": "语言",
+        "status": "状态"
+      },
+      "empty": "暂无记录"
+    },
+    "security": {
+      "title": "安全设置",
+      "current": "当前密码",
+      "new": "新密码",
+      "confirm": "确认新密码",
+      "strength": "密码强度",
+      "submit": "确认修改",
+      "success": "密码修改成功",
+      "fail": "密码修改失败",
+      "mismatch": "新密码与确认密码不一致"
+    }
+  }
+}

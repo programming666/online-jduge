@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Problem {
+  id              Int      @id @default(autoincrement())
+  title           String
+  description     String   // Markdown content
+  timeLimit       Int      // in milliseconds
+  memoryLimit     Int      // in MB
+
+  config          Json?    // { "cpp": { "timeLimit": 1000 }, "python": { "timeLimit": 2000 } }
+
+  defaultCompileOptions String @default("-O2")
+
+  difficulty      Difficulty @default(LEVEL2)
+  tags            String[]  @default([])
+  visible         Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  testCases       TestCase[]
+  submissions     Submission[]
+  contests        ContestProblem[]
+}
+
+enum Difficulty {
+  LEVEL1
+  LEVEL2
+  LEVEL3
+  LEVEL4
+  LEVEL5
+  LEVEL6
+  LEVEL7
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  password String
+  role     Role     @default(STUDENT)
+  isBanned Boolean  @default(false)
+  bannedAt DateTime?
+  bannedReason String?
+  preferences  Json?    // User UI preferences
+  submissions Submission[]
+  participants ContestParticipant[]
+  passwordAttempts ContestPasswordAttempt[]
+  bannedIPs BannedIP[]
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+model TestCase {
+  id              Int      @id @default(autoincrement())
+  input           String
+  expectedOutput  String
+  problemId       Int
+  problem         Problem  @relation(fields: [problemId], references: [id])
+}
+
+model Submission {
+  id              Int      @id @default(autoincrement())
+  code            String
+  language        String   // "cpp", "python"
+  status          String   // "Pending", "Accepted", "Wrong Answer", "Time Limit Exceeded", "Memory Limit Exceeded", "Compilation Error", "Runtime Error"
+  output          String?  // Compiler output or runtime error message
+  
+  timeUsed        Int?     // ms
+  memoryUsed      Int?     // KB
+  score           Int?     @default(0)
+  testCaseResults Json?    // Detailed results per test case
+
+  createdAt       DateTime @default(now())
+  
+  problemId       Int
+  problem         Problem  @relation(fields: [problemId], references: [id])
+  
+  userId          Int?
+  user            User?    @relation(fields: [userId], references: [id])
+  contestId       Int?
+  contest         Contest? @relation(fields: [contestId], references: [id])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model Contest {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  rule        ContestRule
+  passwordHash String?
+  isPublished Boolean       @default(false)
+  languages   String[]      @default([])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  problems    ContestProblem[]
+  participants ContestParticipant[]
+  submissions Submission[]
+  passwordAttempts ContestPasswordAttempt[]
+}
+
+model ContestProblem {
+  id        Int     @id @default(autoincrement())
+  order     Int     @default(0)
+
+  contestId Int
+  problemId Int
+
+  contest   Contest @relation(fields: [contestId], references: [id])
+  problem   Problem @relation(fields: [problemId], references: [id])
+}
+
+model ContestParticipant {
+  id        Int @id @default(autoincrement())
+
+  contestId Int
+  userId    Int
+
+  contest   Contest @relation(fields: [contestId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([contestId, userId], name: "contestId_userId")
+}
+
+model ContestPasswordAttempt {
+  id           Int      @id @default(autoincrement())
+  contestId    Int
+  userId       Int
+  failedCount  Int      @default(0)
+  lastFailedAt DateTime?
+
+  contest Contest @relation(fields: [contestId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([contestId, userId], name: "contestId_userId_attempt")
+}
+
+enum ContestRule {
+  OI
+  IOI
+  ACM
+}
+
+model BannedIP {
+  id        Int       @id @default(autoincrement())
+  ip        String    @unique
+  userId    Int?
+  reason    String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

@@ -1,0 +1,14 @@
+FROM ubuntu:24.04
+
+# Install g++ and python3 and time
+RUN apt-get update && \
+    apt-get install -y g++ python3 time && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Create a non-root user
+RUN useradd -m -s /bin/bash runner && chown -R runner:runner /app
+
+# Default command (can be overridden)
+CMD ["/bin/bash"]

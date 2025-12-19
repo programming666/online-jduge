@@ -1,0 +1,444 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "delete": "Delete",
+    "copy": "Copy",
+    "save": "Save",
+    "back": "Back",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "unit": {
+      "ms": "ms",
+      "kb": "KB",
+      "mb": "MB"
+    }
+  },
+  "nav": {
+    "title": "Online Judge",
+    "home": "Home",
+    "problems": "Problems",
+    "contest": "Contests",
+    "submissions": "Submissions",
+    "addProblem": "Add Problem",
+    "contests": "Contests",
+    "settings": "Settings",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "hi": "Hi"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "username": "Username",
+      "password": "Password",
+      "signIn": "Sign in",
+      "loginFailed": "Login failed"
+    },
+    "register": {
+      "title": "Register new account",
+      "username": "Username",
+      "password": "Password",
+      "role": "Role",
+      "student": "Student",
+      "admin": "Admin",
+      "registerButton": "Register",
+      "registrationFailed": "Registration failed"
+    }
+  },
+  "problem": {
+    "list": {
+      "title": "Problems",
+      "id": "ID",
+      "problemTitle": "Title",
+      "createdAt": "Created At",
+      "difficulty": "Difficulty",
+      "noProblems": "No problems found.",
+      "searchPlaceholder": "Search ID or Title...",
+      "allDifficulties": "All Difficulties",
+      "score": "Score"
+    },
+    "detail": {
+      "timeLimit": "Time Limit",
+      "memoryLimit": "Memory Limit",
+      "difficulty": "Difficulty",
+      "description": "Description",
+      "codeEditor": "Code Editor",
+      "submitSolution": "Submit Solution",
+      "submitting": "Submitting...",
+      "submissionFailed": "Submission failed",
+      "deleteConfirm": "Are you sure you want to delete this problem? This action cannot be undone and will delete all related submissions.",
+      "deleteFailed": "Delete problem failed",
+      "copyFailed": "Copy problem failed",
+      "writeYourSolution": "// Write your solution here",
+      "diffSame": "Same Lines",
+      "diffDifferent": "Different Lines"
+    },
+    "add": {
+      "title": "Add New Problem",
+      "problemTitle": "Title",
+      "description": "Description (Markdown)",
+      "defaultTimeLimit": "Default Time Limit (ms)",
+      "memoryLimit": "Memory Limit (MB)",
+      "languageSpecific": "Language Specific Settings",
+      "cppTimeLimit": "C++ Time Limit (Optional override)",
+      "pythonTimeLimit": "Python Time Limit (Optional override)",
+      "cppCompileOptions": "C++ Compile Options",
+      "testCases": "Test Cases",
+      "addCase": "+ Add Case",
+      "input": "Input",
+      "expectedOutput": "Expected Output",
+      "remove": "Remove",
+      "createProblem": "Create Problem",
+      "errorAdding": "Error adding problem",
+      "tags": "Tags",
+      "tagsPlaceholder": "Separate multiple tags with commas, e.g. graph, dp"
+    },
+    "edit": {
+      "title": "Edit Problem",
+      "updateProblem": "Update Problem",
+      "errorUpdating": "Error updating problem"
+    },
+    "difficulty": {
+      "LEVEL1": "Introductory",
+      "LEVEL2": "Popularization-",
+      "LEVEL3": "Popularization/Improvement-",
+      "LEVEL4": "Popularization+/Improvement",
+      "LEVEL5": "Improvement+/Provincial-",
+      "LEVEL6": "Provincial/NOI-",
+      "LEVEL7": "NOI/NOI+/CSTC"
+    }
+  },
+  "settings": {
+    "title": "System Settings",
+    "registration": {
+      "title": "User Registration Switch",
+      "description": "Control whether new users can register. When disabled, only existing users can sign in.",
+      "enabled": "Registration enabled (new users can register)",
+      "disabled": "Registration disabled (new users cannot register)",
+      "enableConfirm": "Are you sure you want to enable new user registration?",
+      "disableConfirm": "Are you sure you want to disable new user registration?",
+      "updateSuccess": "Registration switch updated successfully",
+      "updateFailed": "Failed to update registration switch"
+    },
+    "homepage": {
+      "title": "Homepage Customization",
+      "description": "Customize the homepage content using Markdown or HTML.",
+      "placeholder": "Enter homepage content here...",
+      "updateSuccess": "Homepage content updated successfully",
+      "updateFailed": "Failed to update homepage content"
+    },
+    "footer": {
+      "title": "Footer Customization",
+      "description": "Customize the footer content using Markdown or HTML.",
+      "placeholder": "Enter footer content here...",
+      "updateSuccess": "Footer content updated successfully",
+      "updateFailed": "Failed to update footer content"
+    },
+    "rateLimit": {
+      "title": "Submission Rate Limit",
+      "description": "Set the maximum number of submissions per user per minute.",
+      "label": "Maximum submissions per minute",
+      "updateSuccess": "Rate limit updated successfully",
+      "updateFailed": "Failed to update rate limit"
+    },
+    "userManagement": {
+      "title": "User Management",
+      "description": "Manage system users, including banning and deleting users.",
+      "searchPlaceholder": "Search username...",
+      "columns": {
+        "id": "ID",
+        "username": "Username",
+        "role": "Role",
+        "status": "Status",
+        "createdAt": "Registered At",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "banned": "Banned"
+      },
+      "actions": {
+        "ban": "Ban",
+        "unban": "Unban",
+        "delete": "Delete",
+        "deleteWithBanIP": "Delete & Ban IP",
+        "clearSubmissions": "Clear Submissions",
+        "viewSubmissions": "View Submissions"
+      },
+      "banDialog": {
+        "title": "Ban User",
+        "reason": "Ban Reason",
+        "reasonPlaceholder": "Enter ban reason...",
+        "confirm": "Confirm Ban"
+      },
+      "confirmDelete": "Are you sure you want to delete user {{username}}? This action cannot be undone.",
+      "confirmDeleteWithBanIP": "Are you sure you want to delete user {{username}} and ban their IP address? This action cannot be undone.",
+      "confirmClearSubmissions": "Are you sure you want to clear all submissions of user {{username}}? This action cannot be undone.",
+      "confirmUnban": "Are you sure you want to unban user {{username}}?",
+      "success": {
+        "ban": "User banned",
+        "unban": "User unbanned",
+        "delete": "User deleted",
+        "deleteWithBanIP": "User deleted and IP banned",
+        "clearSubmissions": "Submissions cleared"
+      },
+      "error": {
+        "ban": "Failed to ban user",
+        "unban": "Failed to unban user",
+        "delete": "Failed to delete user",
+        "deleteWithBanIP": "Failed to delete user and ban IP",
+        "clearSubmissions": "Failed to clear submissions",
+        "load": "Failed to load users"
+      },
+      "noUsers": "No users found",
+      "bannedReason": "Ban Reason",
+      "bannedAt": "Banned At"
+    },
+    "bannedIPs": {
+      "title": "Banned IP Management",
+      "description": "Manage banned IP addresses.",
+      "columns": {
+        "ip": "IP Address",
+        "reason": "Ban Reason",
+        "bannedAt": "Banned At",
+        "expiresAt": "Expires At",
+        "actions": "Actions"
+      },
+      "permanent": "Permanent",
+      "unban": "Unban",
+      "confirmUnban": "Are you sure you want to unban IP address {{ip}}?",
+      "success": {
+        "unban": "IP unbanned"
+      },
+      "error": {
+        "unban": "Failed to unban IP",
+        "load": "Failed to load banned IPs"
+      },
+      "noIPs": "No banned IPs"
+    }
+  },
+  "contest": {
+    "list": {
+      "title": "Contests",
+      "statusFilter": "Status Filter",
+      "statusLabel": "Status",
+      "status": {
+        "all": "All Status"
+      },
+      "timeFrom": "Start From",
+      "timeTo": "Start To",
+      "minParticipants": "Min Participants",
+      "maxParticipants": "Max Participants",
+      "pageSize": "Page Size",
+      "view": {
+        "card": "Card View",
+        "list": "List View"
+      },
+      "noContests": "No contests available",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "participants": "Participants",
+      "name": "Name",
+      "actions": "Actions",
+      "join": "Join",
+      "pagination": "Page {{page}} of {{totalPages}}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "ongoing": "Ongoing",
+      "finished": "Finished"
+    },
+    "password": {
+      "title": "Join Contest: {{name}}",
+      "placeholder": "Enter contest password",
+      "show": "Show",
+      "hide": "Hide",
+      "strength": "Password strength",
+      "strength.weak": "Weak",
+      "strength.medium": "Medium",
+      "strength.strong": "Strong",
+      "submit": "Join",
+      "error": "Failed to join",
+      "remaining": "Remaining attempts: {{count}}"
+    },
+    "create": {
+      "title": "Create Contest",
+      "name": "Contest Name",
+      "description": "Contest Description",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "rule": "Rule",
+      "submit": "Create Contest",
+      "nameRequired": "Contest name is required",
+      "timeRequired": "Start and end times are required",
+      "timeInvalid": "End time must be later than start time",
+      "ruleRequired": "Please select a rule",
+      "submitConfirm": "Confirm create contest?",
+      "success": "Contest created successfully",
+      "failed": "Failed to create contest",
+      "problemBank": "Problem Bank",
+      "select": "Select",
+      "tags": "Tags",
+      "tagPlaceholder": "Filter by tags, separated by commas"
+    },
+    "edit": {
+      "title": "Edit Contest",
+      "submit": "Save Contest",
+      "submitConfirm": "Confirm save contest?",
+      "success": "Contest saved successfully",
+      "failed": "Failed to save contest"
+    }
+  },
+  "submission": {
+    "list": {
+      "title": "Submissions",
+      "id": "ID",
+      "time": "Time",
+      "user": "User",
+      "problem": "Problem",
+      "status": "Status",
+      "timeUsed": "Time Used",
+      "language": "Language",
+      "noSubmissions": "No submissions yet.",
+      "anonymous": "Anonymous"
+    },
+    "detail": {
+      "title": "Submission Detail",
+      "submissionId": "Submission ID",
+      "problem": "Problem",
+      "user": "User",
+      "language": "Language",
+      "status": "Status",
+      "timeUsed": "Time Used",
+      "memoryUsed": "Memory Used",
+      "submittedAt": "Submitted At",
+      "code": "Code",
+      "output": "Output",
+      "outputInfo": "Output Info",
+      "testResults": "Test Results",
+      "testCase": "Test Case",
+      "input": "Input",
+      "expectedOutput": "Expected Output",
+      "actualOutput": "Actual Output",
+      "actual": "Actual",
+      "expected": "Expected",
+      "result": "Result",
+      "passed": "Passed",
+      "failed": "Failed",
+      "testPoints": "Test Points",
+      "sourceCode": "Source Code",
+      "showDetails": "Show Details",
+      "hideDetails": "Hide Details",
+      "backToProblem": "Back to Problem",
+      "score": "Score",
+      "caseNumber": "Case #",
+      "time": "Time",
+      "memory": "Memory",
+      "notFound": "Submission not found"
+    },
+    "status": {
+      "accepted": "Accepted",
+      "wrongAnswer": "Wrong Answer",
+      "pending": "Pending",
+      "timeLimitExceeded": "Time Limit Exceeded",
+      "memoryLimitExceeded": "Memory Limit Exceeded",
+      "runtimeError": "Runtime Error",
+      "compileError": "Compile Error"
+    }
+  },
+  "language": {
+    "cpp": "C++ (G++ 13+)",
+    "python": "Python 3"
+  },
+  "error": {
+    "404": {
+      "title": "404 - Page Not Found",
+      "description": "The page you are looking for does not exist.",
+      "backToProblems": "Back to Problems"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "menu": {
+      "problems": "Problem Management",
+      "contests": "Contest Management",
+      "settings": "System Settings",
+      "users": "User Management"
+    },
+    "sidebar": {
+      "collapse": "Collapse Sidebar",
+      "expand": "Expand Sidebar"
+    }
+  }
+  ,
+  "user": {
+    "menu": {
+      "info": "Profile",
+      "code": "My Code",
+      "security": "Security",
+      "preferences": "Preferences"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "theme": "Theme Settings",
+      "editor": "Editor Settings",
+      "fontFamily": "Font Family",
+      "fontSize": "Font Size",
+      "tabSize": "Tab Size",
+      "indentUnit": "Indent Unit",
+      "lineNumbers": "Show Line Numbers",
+      "foldGutter": "Code Folding",
+      "matchBrackets": "Match Brackets",
+      "themes": {
+        "system": "System Default",
+        "light": "Light Mode",
+        "dark": "Dark Mode"
+      }
+    },
+    "info": {
+      "title": "Profile",
+      "today": {
+        "total": "Today's submissions",
+        "ac": "Today's AC",
+        "wrong": "Today's errors",
+        "rate": "AC rate"
+      },
+      "bar": {
+        "title": "Cumulative submissions in last 5 months"
+      },
+      "heat": {
+        "title": "Practice trend heatmap",
+        "note": "Data is not real-time"
+      }
+    },
+    "code": {
+      "title": "My Code",
+      "columns": {
+        "time": "Submitted At",
+        "problemId": "Problem ID",
+        "language": "Language",
+        "status": "Status"
+      },
+      "empty": "No records"
+    },
+    "security": {
+      "title": "Security",
+      "current": "Current Password",
+      "new": "New Password",
+      "confirm": "Confirm New Password",
+      "strength": "Password Strength",
+      "submit": "Update Password",
+      "success": "Password updated",
+      "fail": "Password update failed",
+      "mismatch": "New password and confirmation do not match"
+    }
+  }
+}

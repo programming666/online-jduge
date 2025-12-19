@@ -1,0 +1,46 @@
+@font-face {
+  font-family: 'Cascadia Code';
+  src: url('/static/fonts/CascadiaCode/CascadiaCode.woff2') format('woff2'),
+       url('/static/fonts/CascadiaCode/CascadiaCode.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/static/fonts/FiraCode/FiraCode-Regular.woff2') format('woff2'),
+       url('/static/fonts/FiraCode/FiraCode-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/static/fonts/JetBrainsMono/JetBrainsMono-Regular.woff2') format('woff2'),
+       url('/static/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Monaspace Neon'; /* Monaspace has multiple variants, Neon is the main code one */
+  src: url('/static/fonts/Monaspace/MonaspaceNeon-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Anonymous Pro';
+  src: url('/static/fonts/AnonymousPro/AnonymousPro-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hack';
+  src: url('/static/fonts/Hack/Hack-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Fallbacks and system fonts are handled in CSS logic, but we can define them here if we have local copies */

@@ -1,0 +1,76 @@
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: onlinejudge
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  db-migrate:
+    build: 
+      context: ./server-go
+      dockerfile: Dockerfile.migrate
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/onlinejudge?schema=public
+    command: ["sh", "-c", "npx prisma migrate deploy"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    build: ./server-go
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/onlinejudge?schema=public
+      - PORT=3000
+      - JUDGE_IMAGE=judge-runner:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount the judger image if needed, or rely on it being present in host docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+      # We ensure the runner image is built before server starts
+      judge-runner-builder:
+        condition: service_completed_successfully
+
+  client:
+    build: ./client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+  # This service is a helper to build the judge-runner image on the host
+  # It exits immediately after building (or we use a trick to just build it)
+  # Actually, `docker-compose build` builds services. We can define a service that IS the judge runner image
+  # but we don't want to run it. 
+  # A better way in Docker Compose v2 is just to have a service that builds it, runs a dummy command and exits.
+  # But we need the image to be named `judge-runner:latest`.
+  judge-runner-builder:
+    build: 
+      context: ./server-go
+      dockerfile: internal/judger/Dockerfile-runner
+    image: judge-runner:latest
+    command: ["true"]
+    # We mount docker socket so it's built on the host daemon? 
+    # Wait, `image: judge-runner:latest` will make compose build it and tag it. 
+    # But compose prefixes images with `projectname_`. 
+    # To enforce `judge-runner:latest`, we specify `image: judge-runner:latest`.
+    # And since we don't really need to run it, `command: true` is fine.
+
+volumes:
+  pgdata:
