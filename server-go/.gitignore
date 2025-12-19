@@ -1,4 +1,4 @@
-go.mod
 *.exe
 node_modules
 fonts
+go.sum
