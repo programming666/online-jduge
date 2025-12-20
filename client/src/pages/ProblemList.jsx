@@ -104,60 +104,60 @@ function ProblemList() {
         </select>
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <table className="min-w-full leading-normal">
           <thead>
             <tr>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-20">
                 {t('problem.list.id')}
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                 {t('problem.list.problemTitle')}
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-32">
                 {t('problem.list.difficulty')}
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-24">
                 {t('problem.list.score')}
               </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-40">
                 {t('problem.list.createdAt')}
               </th>
             </tr>
           </thead>
           <tbody>
             {problems.map(problem => (
-              <tr key={problem.id} className="hover:bg-yellow-50 transition-colors">
-                <td className="px-5 py-5 border-b border-gray-200 text-sm">
+              <tr key={problem.id} className="hover:bg-yellow-50 dark:hover:bg-gray-700 transition-colors">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100">
                   {problem.id}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm font-medium text-primary">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-blue-400">
                   <Link to={`/problem/${problem.id}`} className="hover:underline block">
                     {problem.title}
                   </Link>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm">
                   <span className="px-2 py-1 rounded-full text-xs font-semibold" style={badgeStyle(problem.difficulty)}>
                     {t(`problem.difficulty.${problem.difficulty || 'LEVEL2'}`)}
                   </span>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm font-semibold">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-semibold">
                   {problem.score !== undefined ? (
-                    <span className={problem.score === 100 ? "text-green-600" : "text-gray-900"}>
+                    <span className={problem.score === 100 ? "text-green-600 dark:text-green-400" : "text-gray-900 dark:text-gray-100"}>
                       {problem.score}
                     </span>
                   ) : (
                     <span className="text-gray-400">-</span>
                   )}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm text-gray-500">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
                   {new Date(problem.createdAt).toLocaleDateString()}
                 </td>
               </tr>
             ))}
             {problems.length === 0 && (
               <tr>
-                <td colSpan="5" className="px-5 py-5 text-center text-gray-500">{t('problem.list.noProblems')}</td>
+                <td colSpan="5" className="px-5 py-5 text-center text-gray-500 dark:text-gray-400">{t('problem.list.noProblems')}</td>
               </tr>
             )}
           </tbody>

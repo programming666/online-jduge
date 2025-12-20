@@ -241,13 +241,13 @@ function ContestList() {
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-wrap gap-3 items-end">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
               {t('contest.list.statusFilter')}
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="">{t('contest.list.status.all')}</option>
               <option value="upcoming">{t('contest.status.upcoming')}</option>
@@ -257,31 +257,31 @@ function ContestList() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
               {t('contest.list.timeFrom')}
             </label>
             <input
               type="datetime-local"
               value={startFrom}
               onChange={(e) => setStartFrom(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
               {t('contest.list.timeTo')}
             </label>
             <input
               type="datetime-local"
               value={startTo}
               onChange={(e) => setStartTo(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
               {t('contest.list.minParticipants')}
             </label>
             <input
@@ -289,12 +289,12 @@ function ContestList() {
               min="0"
               value={minParticipants}
               onChange={(e) => setMinParticipants(e.target.value)}
-              className="w-24 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
               {t('contest.list.maxParticipants')}
             </label>
             <input
@@ -302,7 +302,7 @@ function ContestList() {
               min="0"
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(e.target.value)}
-              className="w-24 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
@@ -317,11 +317,11 @@ function ContestList() {
 
         <div className="flex flex-wrap gap-3 items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">{t('contest.list.pageSize')}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{t('contest.list.pageSize')}</span>
             <select
               value={pageSize}
               onChange={handlePageSizeChange}
-              className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -330,18 +330,18 @@ function ContestList() {
             </select>
           </div>
 
-          <div className="inline-flex rounded border border-gray-300 overflow-hidden text-xs">
+          <div className="inline-flex rounded border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
             <button
               type="button"
               onClick={() => setViewMode('card')}
-              className={`px-3 py-1 ${viewMode === 'card' ? 'bg-primary text-white' : 'bg-white text-gray-600'}`}
+              className={`px-3 py-1 ${viewMode === 'card' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}
             >
               {t('contest.list.view.card')}
             </button>
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`px-3 py-1 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-white text-gray-600'}`}
+              className={`px-3 py-1 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}
             >
               {t('contest.list.view.list')}
             </button>
@@ -350,16 +350,16 @@ function ContestList() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded border border-red-200 bg-red-50 text-red-700 text-sm">
+        <div className="mb-4 p-3 rounded border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
           {error}
         </div>
       )}
 
-      <div className="bg-white shadow-lg rounded-lg border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         {loading ? (
-          <div className="p-6 text-center text-gray-500">{t('common.loading')}</div>
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
         ) : contests.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">{t('contest.list.noContests')}</div>
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">{t('contest.list.noContests')}</div>
         ) : (
           <div className="p-4">
             {viewMode === 'card' ? (
@@ -381,7 +381,7 @@ function ContestList() {
                   }
 
                   return (
-                    <div key={contest.id} className="border border-gray-200 rounded-lg p-4 flex flex-col justify-between">
+                    <div key={contest.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col justify-between dark:bg-gray-800 transition-colors duration-200">
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-xl font-semibold text-primary">{contest.name}</h3>
@@ -389,10 +389,10 @@ function ContestList() {
                             {statusText}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
                           {contest.description || ''}
                         </p>
-                        <div className="text-xs text-gray-500 space-y-1">
+                        <div className="text-xs text-gray-500 dark:text-gray-500 space-y-1">
                           <div>
                             {t('contest.list.startTime')}: {formatDateTime(contest.startTime)}
                           </div>
@@ -405,7 +405,7 @@ function ContestList() {
                         </div>
                       </div>
                       <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xs text-gray-500 uppercase">{contest.rule}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-500 uppercase">{contest.rule}</span>
                         <button
                           type="button"
                           onClick={() => openPasswordModal(contest)}
@@ -423,12 +423,12 @@ function ContestList() {
                 <table className="min-w-full text-sm leading-normal">
                   <thead>
                     <tr>
-                      <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.name')}</th>
-                      <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.startTime')}</th>
-                      <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.endTime')}</th>
-                      <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.status')}</th>
-                      <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.participants')}</th>
-                      <th className="px-4 py-2 border-b bg-gray-50 text-right">{t('contest.list.actions')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.name')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.startTime')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.endTime')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.status')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.participants')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-right text-gray-700 dark:text-gray-200">{t('contest.list.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -449,22 +449,22 @@ function ContestList() {
                       }
 
                       return (
-                        <tr key={contest.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 border-b">
+                        <tr key={contest.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                          <td className="px-4 py-2 border-b dark:border-gray-700">
                             <div className="font-semibold text-primary">{contest.name}</div>
-                            <div className="text-xs text-gray-500 line-clamp-1">{contest.description || ''}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{contest.description || ''}</div>
                           </td>
-                          <td className="px-4 py-2 border-b text-xs text-gray-600">{formatDateTime(contest.startTime)}</td>
-                          <td className="px-4 py-2 border-b text-xs text-gray-600">{formatDateTime(contest.endTime)}</td>
-                          <td className="px-4 py-2 border-b">
+                          <td className="px-4 py-2 border-b dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400">{formatDateTime(contest.startTime)}</td>
+                          <td className="px-4 py-2 border-b dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400">{formatDateTime(contest.endTime)}</td>
+                          <td className="px-4 py-2 border-b dark:border-gray-700">
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusClass}`}>
                               {statusText}
                             </span>
                           </td>
-                          <td className="px-4 py-2 border-b text-center text-xs text-gray-700">
+                          <td className="px-4 py-2 border-b dark:border-gray-700 text-center text-xs text-gray-700 dark:text-gray-300">
                             {contest.participantCount}
                           </td>
-                          <td className="px-4 py-2 border-b text-right">
+                          <td className="px-4 py-2 border-b dark:border-gray-700 text-right">
                             <button
                               type="button"
                               onClick={() => openPasswordModal(contest)}
@@ -484,8 +484,8 @@ function ContestList() {
         )}
 
         {!loading && totalPages > 1 && (
-          <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between">
-            <div className="text-xs text-gray-500">
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               {t('contest.list.pagination', {
                 page,
                 totalPages
@@ -496,7 +496,7 @@ function ContestList() {
                 type="button"
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
-                className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50"
+                className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:text-gray-300 disabled:opacity-50 dark:disabled:opacity-30"
               >
                 {t('contest.list.prev')}
               </button>
@@ -504,7 +504,7 @@ function ContestList() {
                 type="button"
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= totalPages}
-                className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50"
+                className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:text-gray-300 disabled:opacity-50 dark:disabled:opacity-30"
               >
                 {t('contest.list.next')}
               </button>
@@ -515,7 +515,7 @@ function ContestList() {
 
       {selectedContest && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold mb-4 text-primary">
               {t('contest.password.title', { name: selectedContest.name })}
             </h3>
@@ -527,26 +527,26 @@ function ContestList() {
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     placeholder={t('contest.password.placeholder')}
-                    className="w-full border border-gray-300 rounded p-2 pr-16 focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded p-2 pr-16 focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                   <button
                     type="button"
                     onClick={() => setPasswordVisible((prev) => !prev)}
-                    className="absolute inset-y-0 right-2 px-2 text-xs text-gray-600 hover:text-gray-800"
+                    className="absolute inset-y-0 right-2 px-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   >
                     {passwordVisible ? t('contest.password.hide') : t('contest.password.show')}
                   </button>
                 </div>
                 {passwordStrength && (
                   <div className="mt-1 text-xs">
-                    <span className="text-gray-500 mr-2">{t('contest.password.strength')}</span>
+                    <span className="text-gray-500 dark:text-gray-400 mr-2">{t('contest.password.strength')}</span>
                     <span
                       className={
                         passwordStrength === 'strong'
-                          ? 'text-green-600'
+                          ? 'text-green-600 dark:text-green-400'
                           : passwordStrength === 'medium'
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-red-600 dark:text-red-400'
                       }
                     >
                       {t(`contest.password.strength.${passwordStrength}`)}
@@ -556,13 +556,13 @@ function ContestList() {
               </div>
             )}
             {passwordError && (
-              <div className="mb-2 text-sm text-red-600">{passwordError}</div>
+              <div className="mb-2 text-sm text-red-600 dark:text-red-400">{passwordError}</div>
             )}
             <div className="flex justify-end space-x-2 mt-4">
               <button
                 type="button"
                 onClick={closePasswordModal}
-                className="px-4 py-2 text-sm rounded border border-gray-300"
+                className="px-4 py-2 text-sm rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 {t('common.cancel')}
               </button>

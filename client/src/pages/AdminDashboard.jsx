@@ -40,20 +40,20 @@ function AdminDashboard() {
     <div className="flex min-h-[calc(100vh-120px)]">
       {/* Sidebar */}
       <div
-        className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+        className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${
           sidebarOpen ? 'w-64' : 'w-16'
         }`}
       >
         {/* Hamburger Menu Button */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={toggleSidebar}
-            className="p-2 rounded hover:bg-gray-100 transition-colors"
+            className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label={sidebarOpen ? t('admin.sidebar.collapse') : t('admin.sidebar.expand')}
           >
             <svg
-              className="w-6 h-6 text-gray-600"
+              className="w-6 h-6 text-gray-600 dark:text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -78,7 +78,7 @@ function AdminDashboard() {
               className={`w-full flex items-center px-3 py-3 rounded-lg mb-1 transition-colors ${
                 activeTab === item.key
                   ? 'bg-primary text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               <span className="text-xl">{item.icon}</span>
@@ -93,12 +93,12 @@ function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-gray-50 overflow-auto">
+      <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900 overflow-auto transition-colors duration-200">
         <div className="mb-4">
-          <h1 className="text-2xl font-bold text-primary">
+          <h1 className="text-2xl font-bold text-primary dark:text-blue-400">
             {t('admin.title')}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {t(`admin.menu.${activeTab}`)}
           </p>
         </div>

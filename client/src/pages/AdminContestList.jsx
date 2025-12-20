@@ -119,10 +119,10 @@ function AdminContestList({ embedded = false }) {
   const allSelected = contests.length > 0 && selectedIds.length === contests.length;
 
   return (
-    <div className={embedded ? '' : 'max-w-6xl mx-auto bg-white p-6 rounded-lg shadow border border-gray-200'}>
+    <div className={embedded ? '' : 'max-w-6xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700'}>
       <div className="flex items-center justify-between mb-4">
         {!embedded && (
-          <h2 className="text-2xl font-bold text-primary">
+          <h2 className="text-2xl font-bold text-primary dark:text-blue-400">
             {t('admin.menu.contests')}
           </h2>
         )}
@@ -131,7 +131,7 @@ function AdminContestList({ embedded = false }) {
           <button
             type="button"
             onClick={goToCreate}
-            className="px-4 py-2 rounded bg-primary text-white text-sm font-semibold hover:bg-blue-600"
+            className="px-4 py-2 rounded bg-primary text-white text-sm font-semibold hover:bg-blue-600 dark:hover:bg-blue-500"
           >
             创建比赛
           </button>
@@ -139,7 +139,7 @@ function AdminContestList({ embedded = false }) {
             type="button"
             onClick={() => handleBatchPublish(true)}
             disabled={processing || selectedIds.length === 0}
-            className="px-3 py-2 rounded border border-green-500 text-green-600 text-sm disabled:opacity-50"
+            className="px-3 py-2 rounded border border-green-500 text-green-600 dark:text-green-400 text-sm disabled:opacity-50 hover:bg-green-50 dark:hover:bg-green-900/20"
           >
             批量发布
           </button>
@@ -147,7 +147,7 @@ function AdminContestList({ embedded = false }) {
             type="button"
             onClick={() => handleBatchPublish(false)}
             disabled={processing || selectedIds.length === 0}
-            className="px-3 py-2 rounded border border-yellow-500 text-yellow-600 text-sm disabled:opacity-50"
+            className="px-3 py-2 rounded border border-yellow-500 text-yellow-600 dark:text-yellow-400 text-sm disabled:opacity-50 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
           >
             批量下线
           </button>
@@ -155,11 +155,11 @@ function AdminContestList({ embedded = false }) {
       </div>
 
       {error && (
-        <div className="mb-4 text-sm text-red-600">{error}</div>
+        <div className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</div>
       )}
 
       {loading ? (
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
           {t('common.loading')}
         </div>
       ) : (
@@ -167,20 +167,21 @@ function AdminContestList({ embedded = false }) {
           <table className="min-w-full text-sm leading-normal">
             <thead>
               <tr>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
+                    className="rounded border-gray-300 text-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600"
                   />
                 </th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">ID</th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.name')}</th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.startTime')}</th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.statusLabel')}</th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">{t('contest.list.participants')}</th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-left">语言</th>
-                <th className="px-4 py-2 border-b bg-gray-50 text-right">操作</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">ID</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">{t('contest.list.name')}</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">{t('contest.list.startTime')}</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">{t('contest.list.statusLabel')}</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">{t('contest.list.participants')}</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-gray-700 dark:text-gray-300">语言</th>
+                <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-right text-gray-700 dark:text-gray-300">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -194,41 +195,42 @@ function AdminContestList({ embedded = false }) {
                 else statusText = t('contest.status.ongoing');
 
                 return (
-                  <tr key={contest.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 border-b">
+                  <tr key={contest.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td className="px-4 py-2 border-b dark:border-gray-700">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(contest.id)}
                         onChange={() => toggleSelectOne(contest.id)}
+                        className="rounded border-gray-300 text-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600"
                       />
                     </td>
-                    <td className="px-4 py-2 border-b">{contest.id}</td>
-                    <td className="px-4 py-2 border-b whitespace-nowrap">{contest.name}</td>
-                    <td className="px-4 py-2 border-b">
+                    <td className="px-4 py-2 border-b dark:border-gray-700 text-gray-900 dark:text-gray-200">{contest.id}</td>
+                    <td className="px-4 py-2 border-b dark:border-gray-700 whitespace-nowrap text-gray-900 dark:text-gray-200">{contest.name}</td>
+                    <td className="px-4 py-2 border-b dark:border-gray-700 text-gray-600 dark:text-gray-400">
                       <div>{formatDateTime(contest.startTime)}</div>
                       <div>{formatDateTime(contest.endTime)}</div>
                     </td>
-                    <td className="px-4 py-2 border-b">
+                    <td className="px-4 py-2 border-b dark:border-gray-700">
                       <div className="flex items-center space-x-2">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
                           {statusText}
                         </span>
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${contest.isPublished ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'}`}>
                           {contest.isPublished ? '已发布' : '未发布'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-2 border-b text-center">
+                    <td className="px-4 py-2 border-b dark:border-gray-700 text-center text-gray-900 dark:text-gray-200">
                       {typeof contest.participantCount === 'number' ? contest.participantCount : 0}
                     </td>
-                    <td className="px-4 py-2 border-b">
+                    <td className="px-4 py-2 border-b dark:border-gray-700 text-gray-600 dark:text-gray-400">
                       {(contest.languages || []).join(', ') || '-'}
                     </td>
-                    <td className="px-4 py-2 border-b text-right space-x-2">
+                    <td className="px-4 py-2 border-b dark:border-gray-700 text-right space-x-2">
                       <button
                         type="button"
                         onClick={() => goToEdit(contest.id)}
-                        className="px-3 py-1 rounded border border-gray-300 text-xs"
+                        className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         编辑
                       </button>
@@ -236,7 +238,7 @@ function AdminContestList({ embedded = false }) {
                         type="button"
                         onClick={() => handleExport(contest.id)}
                         disabled={exportingId === contest.id}
-                        className="px-3 py-1 rounded border border-blue-500 text-xs text-blue-600 disabled:opacity-50"
+                        className="px-3 py-1 rounded border border-blue-500 dark:border-blue-600 text-xs text-blue-600 dark:text-blue-400 disabled:opacity-50 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                       >
                         导出代码
                       </button>
@@ -248,7 +250,7 @@ function AdminContestList({ embedded = false }) {
                 <tr>
                   <td
                     colSpan="8"
-                    className="px-4 py-4 text-center text-gray-500"
+                    className="px-4 py-4 text-center text-gray-500 dark:text-gray-400 border-b dark:border-gray-700"
                   >
                     {t('problem.list.noProblems')}
                   </td>

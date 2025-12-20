@@ -52,35 +52,35 @@ function SubmissionList() {
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6 text-primary border-b-4 border-secondary inline-block pb-1">{t('submission.list.title')}</h2>
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <table className="min-w-full leading-normal">
           <thead>
             <tr>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.id')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.time')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.user')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.problem')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.status')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.timeUsed')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('submission.list.language')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.id')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.time')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.user')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.problem')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.status')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.timeUsed')}</th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.language')}</th>
             </tr>
           </thead>
           <tbody>
             {submissions?.map(sub => (
-              <tr key={sub.id} className="hover:bg-gray-50">
-                <td className="px-5 py-5 border-b border-gray-200 text-sm font-bold text-primary">
+              <tr key={sub.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-bold text-primary dark:text-blue-400">
                     <Link to={`/submission/${sub.id}`} className="hover:underline">#{sub.id}</Link>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm text-gray-500">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
                     {new Date(sub.createdAt).toLocaleString()}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm font-medium text-gray-700">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200">
                     {sub.user?.username || t('submission.list.anonymous')}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm font-medium text-primary">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-blue-400">
                   <Link to={`/problem/${sub.problemId}`} className="hover:underline">{sub.problem?.title}</Link>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm">
                   <span className={`px-2 py-1 rounded-full font-semibold text-xs ${getStatusColor(sub.status)}`}>
                     {translateStatus(sub.status)}
                   </span>
@@ -90,10 +90,10 @@ function SubmissionList() {
                       </div>
                   )}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm text-gray-600">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
                     {sub.timeUsed !== null ? `${sub.timeUsed} ${t('common.unit.ms')}` : '-'}
                 </td>
-                <td className="px-5 py-5 border-b border-gray-200 text-sm text-gray-600 uppercase">
+                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300 uppercase">
                     {sub.language}
                 </td>
               </tr>

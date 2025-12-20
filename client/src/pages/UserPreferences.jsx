@@ -4,7 +4,7 @@ import { useUserUI } from '../context/UserUIContext';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { dracula } from '@uiw/codemirror-theme-dracula';
 
 function UserPreferences() {
   const { t } = useTranslation();

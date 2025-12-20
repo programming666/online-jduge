@@ -198,68 +198,71 @@ function AdminContestCreate() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-        <h2 className="text-2xl font-bold text-primary mb-4">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <h2 className="text-2xl font-bold text-primary dark:text-blue-400 mb-4">
           {isEdit ? t('contest.edit.title') : t('contest.create.title')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('contest.create.name')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('contest.create.name')}</label>
             <input
               type="text"
               name="name"
               value={form.name}
               onChange={handleFormChange}
               required
-              className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('contest.create.description')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('contest.create.description')}</label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleFormChange}
               rows="3"
-              className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">语言限制</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">语言限制</label>
               <div className="flex items-center space-x-4">
-                <label className="inline-flex items-center space-x-1 text-sm text-gray-700">
+                <label className="inline-flex items-center space-x-1 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     name="languages"
                     value="cpp"
                     checked={form.languages.includes('cpp')}
                     onChange={handleFormChange}
+                    className="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                   />
                   <span>C++</span>
                 </label>
-                <label className="inline-flex items-center space-x-1 text-sm text-gray-700">
+                <label className="inline-flex items-center space-x-1 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     name="languages"
                     value="python"
                     checked={form.languages.includes('python')}
                     onChange={handleFormChange}
+                    className="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                   />
                   <span>Python</span>
                 </label>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">发布状态</label>
-              <label className="inline-flex items-center space-x-2 text-sm text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">发布状态</label>
+              <label className="inline-flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
                 <input
                   type="checkbox"
                   name="isPublished"
                   checked={form.isPublished}
                   onChange={handleFormChange}
+                  className="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                 />
                 <span>{form.isPublished ? '已发布' : '未发布'}</span>
               </label>
@@ -267,49 +270,49 @@ function AdminContestCreate() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">比赛密码（可选）</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">比赛密码（可选）</label>
             <input
               type="text"
               name="password"
               value={form.password}
               onChange={handleFormChange}
               placeholder="留空表示无密码或保持原密码"
-              className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('contest.create.startTime')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('contest.create.startTime')}</label>
               <input
                 type="datetime-local"
                 name="startTime"
                 value={form.startTime}
                 onChange={handleFormChange}
                 required
-                className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('contest.create.endTime')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('contest.create.endTime')}</label>
               <input
                 type="datetime-local"
                 name="endTime"
                 value={form.endTime}
                 onChange={handleFormChange}
                 required
-                className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('contest.create.rule')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('contest.create.rule')}</label>
             <select
               name="rule"
               value={form.rule}
               onChange={handleFormChange}
-              className="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
             >
               {RULES.map((r) => (
                 <option key={r} value={r}>{r}</option>
@@ -320,18 +323,18 @@ function AdminContestCreate() {
           <button
             type="submit"
             disabled={submitting}
-            className="px-4 py-2 rounded bg-primary text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
+            className="px-4 py-2 rounded bg-primary dark:bg-blue-600 text-white font-semibold hover:bg-blue-600 dark:hover:bg-blue-500 disabled:opacity-60 transition-colors"
           >
             {submitting ? t('common.loading') : (isEdit ? t('contest.edit.submit') : t('contest.create.submit'))}
           </button>
 
-          {message && <div className="mt-2 text-sm text-green-600">{message}</div>}
-          {error && <div className="mt-2 text-sm text-red-600">{error}</div>}
+          {message && <div className="mt-2 text-sm text-green-600 dark:text-green-400">{message}</div>}
+          {error && <div className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</div>}
         </form>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">{t('contest.create.problemBank')}</h3>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('contest.create.problemBank')}</h3>
 
         <div className="flex flex-wrap gap-3 mb-4">
           <input
@@ -339,12 +342,12 @@ function AdminContestCreate() {
             placeholder={t('problem.list.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 min-w-[200px] border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+            className="flex-1 min-w-[200px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
           />
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
-            className="border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+            className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
           >
             <option value="">{t('problem.list.allDifficulties')}</option>
             {DIFFICULTIES.map((d) => (
@@ -356,58 +359,59 @@ function AdminContestCreate() {
             placeholder={t('contest.create.tagPlaceholder')}
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
-            className="min-w-[180px] border border-gray-300 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+            className="min-w-[180px] border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded p-2 focus:ring-2 focus:ring-primary focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
           />
           <button
             type="button"
             onClick={loadProblems}
-            className="px-4 py-2 rounded bg-primary text-white font-semibold hover:bg-blue-600"
+            className="px-4 py-2 rounded bg-primary dark:bg-blue-600 text-white font-semibold hover:bg-blue-600 dark:hover:bg-blue-500 transition-colors"
           >
             {t('common.search')}
           </button>
         </div>
 
         {loadingProblems ? (
-          <div className="text-center text-sm text-gray-500">{t('common.loading')}</div>
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full leading-normal text-sm">
               <thead>
                 <tr>
-                  <th className="px-4 py-2 border-b bg-gray-100">
+                  <th className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     {t('contest.create.select')}
                   </th>
-                  <th className="px-4 py-2 border-b bg-gray-100">{t('problem.list.id')}</th>
-                  <th className="px-4 py-2 border-b bg-gray-100">{t('problem.list.problemTitle')}</th>
-                  <th className="px-4 py-2 border-b bg-gray-100">{t('problem.list.difficulty')}</th>
-                  <th className="px-4 py-2 border-b bg-gray-100">{t('contest.create.tags')}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('problem.list.id')}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('problem.list.problemTitle')}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('problem.list.difficulty')}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('contest.create.tags')}</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white dark:bg-gray-800">
                 {problems.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 border-b text-center">
+                  <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-center">
                       <input
                         type="checkbox"
                         checked={selectedProblems.includes(p.id)}
                         onChange={() => toggleProblem(p.id)}
+                        className="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                       />
                     </td>
-                    <td className="px-4 py-2 border-b">{p.id}</td>
-                    <td className="px-4 py-2 border-b">{p.title}</td>
-                    <td className="px-4 py-2 border-b">
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                    <td className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{p.id}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">{p.title}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                         {t(`problem.difficulty.${p.difficulty || 'LEVEL2'}`)}
                       </span>
                     </td>
-                    <td className="px-4 py-2 border-b">
+                    <td className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
                       {(p.tags || []).join(', ')}
                     </td>
                   </tr>
                 ))}
                 {problems.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
+                    <td colSpan="5" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                       {t('problem.list.noProblems')}
                     </td>
                   </tr>

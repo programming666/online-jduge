@@ -104,19 +104,19 @@ function AdminSettings({ embedded = false }) {
   };
 
   if (loading) {
-    return <div className="p-8 text-center">{t('common.loading')}</div>;
+    return <div className="p-8 text-center dark:text-gray-300">{t('common.loading')}</div>;
   }
 
   return (
-    <div className={embedded ? '' : 'max-w-3xl mx-auto bg-white p-6 rounded-lg shadow border border-gray-200'}>
+    <div className={embedded ? '' : 'max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700 transition-colors duration-200'}>
       {!embedded && (
-        <h2 className="text-2xl font-bold text-primary mb-4">{t('settings.title')}</h2>
+        <h2 className="text-2xl font-bold text-primary dark:text-blue-400 mb-4">{t('settings.title')}</h2>
       )}
 
       {/* Registration Toggle */}
       <section className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('settings.registration.title')}</h3>
-        <p className="text-sm text-gray-600 mb-4">{t('settings.registration.description')}</p>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{t('settings.registration.title')}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.registration.description')}</p>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -125,7 +125,7 @@ function AdminSettings({ embedded = false }) {
               onClick={handleToggle}
               disabled={saving}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                enabled ? 'bg-green-500' : 'bg-gray-300'
+                enabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span
@@ -134,24 +134,24 @@ function AdminSettings({ embedded = false }) {
                 }`}
               />
             </button>
-            <span className="text-sm font-medium text-gray-800">
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
               {enabled ? t('settings.registration.enabled') : t('settings.registration.disabled')}
             </span>
           </div>
         </div>
 
-        {message && <div className="mt-3 text-sm text-green-600">{message}</div>}
+        {message && <div className="mt-3 text-sm text-green-600 dark:text-green-400">{message}</div>}
       </section>
 
-      <hr className="my-8 border-gray-200" />
+      <hr className="my-8 border-gray-200 dark:border-gray-700" />
 
       {/* Rate Limit */}
       <section className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('settings.rateLimit.title')}</h3>
-        <p className="text-sm text-gray-600 mb-4">{t('settings.rateLimit.description')}</p>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{t('settings.rateLimit.title')}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.rateLimit.description')}</p>
 
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('settings.rateLimit.label')}:
           </label>
           <input
@@ -160,27 +160,27 @@ function AdminSettings({ embedded = false }) {
             max="100"
             value={rateLimit}
             onChange={(e) => setRateLimit(e.target.value)}
-            className="w-20 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <button
             type="button"
             onClick={handleSaveRateLimit}
             disabled={saving}
-            className="px-4 py-2 bg-primary text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            className="px-4 py-2 bg-primary dark:bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
           >
             {saving ? t('common.loading') : t('common.save')}
           </button>
         </div>
 
-        {rateLimitMessage && <div className="mt-3 text-sm text-green-600">{rateLimitMessage}</div>}
+        {rateLimitMessage && <div className="mt-3 text-sm text-green-600 dark:text-green-400">{rateLimitMessage}</div>}
       </section>
 
-      <hr className="my-8 border-gray-200" />
+      <hr className="my-8 border-gray-200 dark:border-gray-700" />
 
       {/* Homepage Content */}
       <section className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('settings.homepage.title')}</h3>
-        <p className="text-sm text-gray-600 mb-4">{t('settings.homepage.description')}</p>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{t('settings.homepage.title')}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.homepage.description')}</p>
 
         <div className="space-y-4">
           <MarkdownEditorWithPreview
@@ -196,22 +196,22 @@ function AdminSettings({ embedded = false }) {
               type="button"
               onClick={handleSaveHomeContent}
               disabled={saving}
-              className="px-6 py-2 bg-primary text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              className="px-6 py-2 bg-primary dark:bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
             >
               {saving ? t('common.loading') : t('common.save')}
             </button>
           </div>
         </div>
 
-        {homeMessage && <div className="mt-3 text-sm text-green-600">{homeMessage}</div>}
+        {homeMessage && <div className="mt-3 text-sm text-green-600 dark:text-green-400">{homeMessage}</div>}
       </section>
 
-      <hr className="my-8 border-gray-200" />
+      <hr className="my-8 border-gray-200 dark:border-gray-700" />
 
       {/* Footer Content */}
       <section>
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('settings.footer.title')}</h3>
-        <p className="text-sm text-gray-600 mb-4">{t('settings.footer.description')}</p>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{t('settings.footer.title')}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.footer.description')}</p>
 
         <div className="space-y-4">
           <MarkdownEditorWithPreview
@@ -227,17 +227,17 @@ function AdminSettings({ embedded = false }) {
               type="button"
               onClick={handleSaveFooterContent}
               disabled={saving}
-              className="px-6 py-2 bg-primary text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              className="px-6 py-2 bg-primary dark:bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
             >
               {saving ? t('common.loading') : t('common.save')}
             </button>
           </div>
         </div>
 
-        {footerMessage && <div className="mt-3 text-sm text-green-600">{footerMessage}</div>}
+        {footerMessage && <div className="mt-3 text-sm text-green-600 dark:text-green-400">{footerMessage}</div>}
       </section>
 
-      {error && <div className="mt-6 text-sm text-red-600 bg-red-50 p-3 rounded">{error}</div>}
+      {error && <div className="mt-6 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded">{error}</div>}
     </div>
   );
 }
