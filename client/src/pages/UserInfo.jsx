@@ -158,7 +158,7 @@ function UserInfo() {
         calendar: {
           range: [`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-01`, `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`],
           cellSize: [18, 18],
-          left: 20,
+          left: 40,
           right: 20,
           top: 40,
           bottom: 20,
@@ -182,34 +182,34 @@ function UserInfo() {
   return (
     <PageTransition>
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-primary">{t('user.info.title')}</h2>
+        <h2 className="text-2xl font-bold text-primary dark:text-blue-400">{t('user.info.title')}</h2>
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded shadow p-4 border">
-            <div className="text-sm text-gray-500">{t('user.info.today.total')}</div>
-            <div className="text-2xl font-bold">{todayStats.total}</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-4 border dark:border-gray-700 transition-colors duration-200">
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('user.info.today.total')}</div>
+            <div className="text-2xl font-bold dark:text-gray-200">{todayStats.total}</div>
           </div>
-          <div className="bg-white rounded shadow p-4 border">
-            <div className="text-sm text-gray-500">{t('user.info.today.ac')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-4 border dark:border-gray-700 transition-colors duration-200">
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('user.info.today.ac')}</div>
             <div className="text-2xl font-bold" style={{ color: DIFF_RGB.LEVEL4 }}>{todayStats.ac}</div>
           </div>
-          <div className="bg-white rounded shadow p-4 border">
-            <div className="text-sm text-gray-500">{t('user.info.today.wrong')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-4 border dark:border-gray-700 transition-colors duration-200">
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('user.info.today.wrong')}</div>
             <div className="text-2xl font-bold" style={{ color: DIFF_RGB.LEVEL1 }}>{todayStats.wrong}</div>
           </div>
-          <div className="bg-white rounded shadow p-4 border">
-            <div className="text-sm text-gray-500">{t('user.info.today.rate')}</div>
-            <div className="text-2xl font-bold">{todayStats.rate}%</div>
+          <div className="bg-white dark:bg-gray-800 rounded shadow p-4 border dark:border-gray-700 transition-colors duration-200">
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t('user.info.today.rate')}</div>
+            <div className="text-2xl font-bold dark:text-gray-200">{todayStats.rate}%</div>
           </div>
         </section>
 
-        <section className="bg-white rounded shadow p-4 border">
-          <h3 className="text-lg font-semibold mb-2">{t('user.info.bar.title')}</h3>
+        <section className="bg-white dark:bg-gray-800 rounded shadow p-4 border dark:border-gray-700 transition-colors duration-200">
+          <h3 className="text-lg font-semibold mb-2 dark:text-gray-200">{t('user.info.bar.title')}</h3>
           <div ref={barRef} style={{ width: '100%', height: 300 }} />
         </section>
 
-        <section className="bg-white rounded shadow p-4 border">
+        <section className="bg-white dark:bg-gray-800 rounded shadow p-4 border dark:border-gray-700 transition-colors duration-200">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-semibold">{t('user.info.heat.title')}</h3>
+            <h3 className="text-lg font-semibold dark:text-gray-200">{t('user.info.heat.title')}</h3>
             <span className="text-sm text-gray-400">{t('user.info.heat.note')}</span>
           </div>
           <div ref={heatRef} style={{ width: '100%', height: 280 }} />

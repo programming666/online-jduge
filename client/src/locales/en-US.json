@@ -397,6 +397,8 @@
       "lineNumbers": "Show Line Numbers",
       "foldGutter": "Code Folding",
       "matchBrackets": "Match Brackets",
+      "preview": "Code Preview",
+      "previewHint": "Preview is for reference only. Actual appearance may vary depending on monitor settings.",
       "themes": {
         "system": "System Default",
         "light": "Light Mode",

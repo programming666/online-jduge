@@ -4,7 +4,12 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from '@codemirror/lang-cpp';
 import { python } from '@codemirror/lang-python';
+import { dracula } from '@uiw/codemirror-theme-dracula';
+import { EditorView } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { indentUnit } from '@codemirror/language';
 import { useAuth } from '../context/AuthContext';
+import { useUserUI } from '../context/UserUIContext';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -18,6 +23,7 @@ function ContestProblem() {
   const { id, order } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { preferences, isDark } = useUserUI();
   const { t } = useTranslation();
 
   const [contest, setContest] = useState(null);
@@ -69,7 +75,7 @@ function ContestProblem() {
     }
     setLanguage(lang);
     if (lang === 'cpp') {
-      setCode('// Write your solution here\n#include <iostream>\n\nint main() {\n    return 0;\n}');
+      setCode('');
     } else {
       setCode('# Write your solution here\nimport sys\n\n# Read from stdin');
     }
@@ -184,17 +190,26 @@ function ContestProblem() {
           </select>
         </div>
 
-        <div className="flex-grow border border-gray-300 rounded overflow-auto min-h-0">
+        <div className="flex-grow border border-gray-300 rounded overflow-auto min-h-0" style={{ fontFamily: `${preferences.fontFamily}, monospace`, fontSize: `${preferences.fontSize}px` }}>
           <CodeMirror
             value={code}
             height="100%"
             minHeight="200px"
             maxHeight="100%"
-            extensions={[language === 'cpp' ? cpp() : python()]}
+            extensions={[
+              language === 'cpp' ? cpp() : python(),
+              indentUnit.of(" ".repeat(preferences.tabSize)),
+              EditorState.tabSize.of(preferences.tabSize),
+              EditorView.theme({
+                "&": { fontFamily: `${preferences.fontFamily}, monospace` },
+                ".cm-scroller": { fontFamily: `${preferences.fontFamily}, monospace` },
+                ".cm-content": { fontFamily: `${preferences.fontFamily}, monospace` }
+              })
+            ]}
             onChange={(val) => setCode(val)}
-            theme="light"
+            theme={isDark ? dracula : 'light'}
             basicSetup={{
-              lineNumbers: true,
+              lineNumbers: preferences.lineNumbers,
               highlightActiveLineGutter: true,
               highlightSpecialChars: true,
               history: true,

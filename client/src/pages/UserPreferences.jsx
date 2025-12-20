@@ -5,6 +5,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import { dracula } from '@uiw/codemirror-theme-dracula';
+import { EditorView } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { indentUnit } from '@codemirror/language';
 
 function UserPreferences() {
   const { t } = useTranslation();
@@ -24,9 +27,9 @@ function UserPreferences() {
   ];
 
   const themes = [
-    { name: t('user.preferences.theme.system'), value: 'system' },
-    { name: t('user.preferences.theme.light'), value: 'light' },
-    { name: t('user.preferences.theme.dark'), value: 'dark' }
+    { name: t('user.preferences.themes.system'), value: 'system' },
+    { name: t('user.preferences.themes.light'), value: 'light' },
+    { name: t('user.preferences.themes.dark'), value: 'dark' }
   ];
 
   const tabSizes = [2, 4, 8];
@@ -70,6 +73,16 @@ function UserPreferences() {
     const exts = [];
     if (previewLang === 'cpp') exts.push(cpp());
     if (previewLang === 'python') exts.push(python());
+
+    // Dynamic settings
+    exts.push(indentUnit.of(" ".repeat(preferences.tabSize)));
+    exts.push(EditorState.tabSize.of(preferences.tabSize));
+    exts.push(EditorView.theme({
+      "&": { fontFamily: preferences.fontFamily },
+      ".cm-scroller": { fontFamily: preferences.fontFamily },
+      ".cm-content": { fontFamily: preferences.fontFamily }
+    }));
+
     return exts;
   };
 
@@ -116,7 +129,7 @@ if __name__ == "__main__":
           {/* Theme */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('user.preferences.theme.label')}
+              {t('user.preferences.theme')}
             </label>
             <select
               value={preferences.theme}

@@ -48,7 +48,7 @@ export const UserUIProvider = ({ children }) => {
   // Fetch preferences from server when user logs in
   useEffect(() => {
     if (user) {
-      axios.get('/user/preferences')
+      axios.get('/api/user/preferences')
         .then(res => {
           if (res.data.preferences && Object.keys(res.data.preferences).length > 0) {
             // Merge server preferences with defaults to ensure all keys exist
@@ -71,7 +71,7 @@ export const UserUIProvider = ({ children }) => {
         // Let's send the partial update merged with current state
         const current = readLS('ui:preferences', defaultPreferences);
         const toSave = { ...current, ...newPrefs };
-        await axios.put('/user/preferences', { preferences: toSave });
+        await axios.put('/api/user/preferences', { preferences: toSave });
       } catch (err) {
         console.error("Failed to save preferences", err);
       }

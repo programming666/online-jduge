@@ -134,6 +134,9 @@ func (a *App) buildRouter() http.Handler {
 			r.With(a.authenticateToken, a.authorizeAdmin).Put("/footer", a.handleFooterPut)
 			r.Get("/rate-limit", a.handleRateLimitGet)
 			r.With(a.authenticateToken, a.authorizeAdmin).Put("/rate-limit", a.handleRateLimitPut)
+			r.Get("/turnstile", a.handleTurnstileGet)
+			r.With(a.authenticateToken, a.authorizeAdmin).Put("/turnstile", a.handleTurnstilePut)
+			r.With(a.authenticateToken, a.authorizeAdmin).Post("/turnstile/verify", a.handleTurnstileVerify)
 		})
 
 		r.Route("/admin/users", func(r chi.Router) {
@@ -274,6 +277,7 @@ func (a *App) handleRegister(w http.ResponseWriter, r *http.Request) {
 		Username string `json:"username"`
 		Password string `json:"password"`
 		Role     string `json:"role"`
+		CfToken  string `json:"cfToken"`
 	}
 	if err := readJSON(r, &body); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid JSON"})
@@ -292,6 +296,19 @@ func (a *App) handleRegister(w http.ResponseWriter, r *http.Request) {
 	if !enabled {
 		writeJSON(w, http.StatusForbidden, map[string]any{"error": "Registration is currently disabled"})
 		return
+	}
+	turnEnabled, _ := a.store.GetTurnstileEnabled(r.Context())
+	if !turnEnabled {
+		if v := strings.TrimSpace(os.Getenv("TURNSTILE_ENABLED")); v == "1" || strings.EqualFold(v, "true") {
+			turnEnabled = true
+		}
+	}
+	if turnEnabled {
+		ok, errs := a.verifyTurnstile(r, body.CfToken)
+		if !ok {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Verification failed", "codes": errs})
+			return
+		}
 	}
 
 	role := "STUDENT"
@@ -332,6 +349,7 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
+		CfToken  string `json:"cfToken"`
 	}
 	if err := readJSON(r, &body); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid JSON"})
@@ -354,6 +372,19 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	turnEnabled, _ := a.store.GetTurnstileEnabled(r.Context())
+	if !turnEnabled {
+		if v := strings.TrimSpace(os.Getenv("TURNSTILE_ENABLED")); v == "1" || strings.EqualFold(v, "true") {
+			turnEnabled = true
+		}
+	}
+	if turnEnabled {
+		ok, errs := a.verifyTurnstile(r, body.CfToken)
+		if !ok {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Verification failed", "codes": errs})
+			return
+		}
+	}
 	if bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(body.Password)) != nil {
 		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "Invalid password"})
 		return

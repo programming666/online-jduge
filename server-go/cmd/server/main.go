@@ -16,7 +16,10 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	port := os.Getenv("API_PORT")
+	if strings.TrimSpace(port) == "" {
+		port = os.Getenv("PORT")
+	}
 	if strings.TrimSpace(port) == "" {
 		port = "3000"
 	}

@@ -122,10 +122,71 @@ func (s *Store) UpsertSubmissionRateLimit(ctx context.Context, limit int) (int, 
 		INSERT INTO "Setting" ("key","value") VALUES ('submission_rate_limit',$1)
 		ON CONFLICT ("key") DO UPDATE SET "value"=EXCLUDED."value"
 		RETURNING "value"
-	`, strconv.Itoa(limit)).Scan(&stored)
+		`, strconv.Itoa(limit)).Scan(&stored)
 	if err != nil {
 		return 0, err
 	}
 	result, _ := strconv.Atoi(stored)
 	return result, nil
+}
+
+// Turnstile settings
+func (s *Store) GetTurnstileEnabled(ctx context.Context) (bool, error) {
+	var value sql.NullString
+	err := s.db.QueryRowContext(ctx, `SELECT "value" FROM "Setting" WHERE "key"='turnstile_enabled'`).Scan(&value)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	if !value.Valid {
+		return false, nil
+	}
+	return value.String == "true", nil
+}
+
+func (s *Store) UpsertTurnstileEnabled(ctx context.Context, enabled bool) (bool, error) {
+	val := "false"
+	if enabled {
+		val = "true"
+	}
+	var stored string
+	err := s.db.QueryRowContext(ctx, `
+		INSERT INTO "Setting" ("key","value") VALUES ('turnstile_enabled',$1)
+		ON CONFLICT ("key") DO UPDATE SET "value"=EXCLUDED."value"
+		RETURNING "value"
+	`, val).Scan(&stored)
+	if err != nil {
+		return false, err
+	}
+	return stored == "true", nil
+}
+
+func (s *Store) GetTurnstileSiteKey(ctx context.Context) (string, error) {
+	var value sql.NullString
+	err := s.db.QueryRowContext(ctx, `SELECT "value" FROM "Setting" WHERE "key"='turnstile_site_key'`).Scan(&value)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
+	}
+	if !value.Valid {
+		return "", nil
+	}
+	return value.String, nil
+}
+
+func (s *Store) UpsertTurnstileSiteKey(ctx context.Context, siteKey string) (string, error) {
+	var stored string
+	err := s.db.QueryRowContext(ctx, `
+		INSERT INTO "Setting" ("key","value") VALUES ('turnstile_site_key',$1)
+		ON CONFLICT ("key") DO UPDATE SET "value"=EXCLUDED."value"
+		RETURNING "value"
+	`, siteKey).Scan(&stored)
+	if err != nil {
+		return "", err
+	}
+	return stored, nil
 }

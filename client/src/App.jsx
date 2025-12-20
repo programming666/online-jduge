@@ -1,32 +1,35 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Home from './pages/Home';
-import ProblemList from './pages/ProblemList';
-import ProblemDetail from './pages/ProblemDetail';
-import SubmissionList from './pages/SubmissionList';
-import SubmissionDetail from './pages/SubmissionDetail';
-import AdminAddProblem from './pages/AdminAddProblem';
-import AdminEditProblem from './pages/AdminEditProblem';
-import AdminContestCreate from './pages/AdminContestCreate';
-import AdminDashboard from './pages/AdminDashboard';
-import ContestList from './pages/ContestList';
-import ContestDetail from './pages/ContestDetail';
-import ContestLeaderboard from './pages/ContestLeaderboard';
-import ContestSubmissionList from './pages/ContestSubmissionList';
-import ContestProblem from './pages/ContestProblem';
-import Login from './pages/Login';
-import Register from './pages/Register';
+
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'));
+const ProblemList = lazy(() => import('./pages/ProblemList'));
+const ProblemDetail = lazy(() => import('./pages/ProblemDetail'));
+const SubmissionList = lazy(() => import('./pages/SubmissionList'));
+const SubmissionDetail = lazy(() => import('./pages/SubmissionDetail'));
+const AdminAddProblem = lazy(() => import('./pages/AdminAddProblem'));
+const AdminEditProblem = lazy(() => import('./pages/AdminEditProblem'));
+const AdminContestCreate = lazy(() => import('./pages/AdminContestCreate'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ContestList = lazy(() => import('./pages/ContestList'));
+const ContestDetail = lazy(() => import('./pages/ContestDetail'));
+const ContestLeaderboard = lazy(() => import('./pages/ContestLeaderboard'));
+const ContestSubmissionList = lazy(() => import('./pages/ContestSubmissionList'));
+const ContestProblem = lazy(() => import('./pages/ContestProblem'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const UserLayout = lazy(() => import('./pages/UserLayout'));
+const UserInfo = lazy(() => import('./pages/UserInfo'));
+const UserCode = lazy(() => import('./pages/UserCode'));
+const UserSecurity = lazy(() => import('./pages/UserSecurity'));
+const UserPreferences = lazy(() => import('./pages/UserPreferences'));
+
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { UserUIProvider } from './context/UserUIContext';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import UserAvatarMenu from './components/UserAvatarMenu';
 import Footer from './components/Footer';
-import UserLayout from './pages/UserLayout';
-import UserInfo from './pages/UserInfo';
-import UserCode from './pages/UserCode';
-import UserSecurity from './pages/UserSecurity';
-import UserPreferences from './pages/UserPreferences';
 
 function NavBar() {
   const { user, logout } = useAuth();
@@ -109,55 +112,61 @@ function App() {
           <NavBar />
 
           <div className="container mx-auto p-6 flex-grow">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              <Route path="/" element={<Home />} />
-              <Route path="/problems" element={<ProblemList />} />
-              <Route path="/problem/:id" element={<ProblemDetail />} />
-              <Route path="/submissions" element={<SubmissionList />} />
-              <Route path="/submission/:id" element={<SubmissionDetail />} />
-              <Route path="/contest" element={<ContestList />} />
-              <Route path="/contest/:id" element={<ProtectedRoute><ContestDetail /></ProtectedRoute>} />
-              <Route path="/contest/:id/leaderboard" element={<ProtectedRoute><ContestLeaderboard /></ProtectedRoute>} />
-              <Route path="/contest/:id/submissions" element={<ProtectedRoute><ContestSubmissionList /></ProtectedRoute>} />
-              <Route path="/contest/:id/problem/:order" element={<ProtectedRoute><ContestProblem /></ProtectedRoute>} />
-              
-              <Route path="/admin" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/add" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminAddProblem />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/edit/:id" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminEditProblem />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/contests/:id/edit" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminContestCreate />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/contests/new" element={
-                <ProtectedRoute adminOnly={true}>
-                  <AdminContestCreate />
-                </ProtectedRoute>
-              } />
-              <Route path="/user" element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
-                <Route path="info" element={<UserInfo />} />
-                <Route path="code" element={<UserCode />} />
-                <Route path="security" element={<UserSecurity />} />
-                <Route path="preferences" element={<UserPreferences />} />
-                <Route index element={<Navigate to="info" replace />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+              </div>
+            }>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                
+                <Route path="/" element={<Home />} />
+                <Route path="/problems" element={<ProblemList />} />
+                <Route path="/problem/:id" element={<ProblemDetail />} />
+                <Route path="/submissions" element={<SubmissionList />} />
+                <Route path="/submission/:id" element={<SubmissionDetail />} />
+                <Route path="/contest" element={<ContestList />} />
+                <Route path="/contest/:id" element={<ProtectedRoute><ContestDetail /></ProtectedRoute>} />
+                <Route path="/contest/:id/leaderboard" element={<ProtectedRoute><ContestLeaderboard /></ProtectedRoute>} />
+                <Route path="/contest/:id/submissions" element={<ProtectedRoute><ContestSubmissionList /></ProtectedRoute>} />
+                <Route path="/contest/:id/problem/:order" element={<ProtectedRoute><ContestProblem /></ProtectedRoute>} />
+                
+                <Route path="/admin" element={
+                  <ProtectedRoute adminOnly={true}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/add" element={
+                  <ProtectedRoute adminOnly={true}>
+                    <AdminAddProblem />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/edit/:id" element={
+                  <ProtectedRoute adminOnly={true}>
+                    <AdminEditProblem />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/contests/:id/edit" element={
+                  <ProtectedRoute adminOnly={true}>
+                    <AdminContestCreate />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/contests/new" element={
+                  <ProtectedRoute adminOnly={true}>
+                    <AdminContestCreate />
+                  </ProtectedRoute>
+                } />
+                <Route path="/user" element={<ProtectedRoute><UserLayout /></ProtectedRoute>}>
+                  <Route path="info" element={<UserInfo />} />
+                  <Route path="code" element={<UserCode />} />
+                  <Route path="security" element={<UserSecurity />} />
+                  <Route path="preferences" element={<UserPreferences />} />
+                  <Route index element={<Navigate to="info" replace />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </div>
 
           <Footer />

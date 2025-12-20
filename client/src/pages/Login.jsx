@@ -1,21 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [turnstileEnabled, setTurnstileEnabled] = useState(false);
+  const [siteKey, setSiteKey] = useState('');
+  const [cfToken, setCfToken] = useState('');
   const { login } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/settings/turnstile`);
+        setTurnstileEnabled(!!res.data.enabled);
+        const key = res.data.siteKey || import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY || '';
+        setSiteKey(key);
+      } catch (_) {}
+    };
+    load();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/auth/login', { username, password });
+      const response = await axios.post(`${API_URL}/auth/login`, { username, password, cfToken: cfToken });
       login(response.data);
       navigate('/');
     } catch (err) {
@@ -56,6 +73,12 @@ function Login() {
               />
             </div>
           </div>
+
+          {turnstileEnabled && siteKey && (
+            <div className="mt-2">
+              <TurnstileWidget siteKey={siteKey} onToken={setCfToken} />
+            </div>
+          )}
 
           {error && <div className="text-red-500 text-sm">{error}</div>}
 

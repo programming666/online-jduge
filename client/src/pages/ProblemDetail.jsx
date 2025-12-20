@@ -6,6 +6,8 @@ import { cpp } from '@codemirror/lang-cpp';
 import { python } from '@codemirror/lang-python';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import { EditorView } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { indentUnit } from '@codemirror/language';
 import { useAuth } from '../context/AuthContext';
 import { useUserUI } from '../context/UserUIContext';
 import { useTranslation } from 'react-i18next';
@@ -74,7 +76,7 @@ function ProblemDetail() {
     }
     setLanguage(lang);
     if (lang === 'cpp') {
-      setCode('// Write your solution here\n#include <iostream>\n\nint main() {\n    return 0;\n}');
+      setCode('');
     } else {
       setCode('# Write your solution here\nimport sys\n\n# Read from stdin');
     }
@@ -187,10 +189,12 @@ function ProblemDetail() {
                 maxHeight="100%"
                 extensions={[
                   language === 'cpp' ? cpp() : python(),
+                  indentUnit.of(" ".repeat(preferences.tabSize)),
+                  EditorState.tabSize.of(preferences.tabSize),
                   EditorView.theme({
-                    "&": { fontFamily: `${preferences.fontFamily}, 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace` },
-                    ".cm-scroller": { fontFamily: `${preferences.fontFamily}, 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace` },
-                    ".cm-content": { fontFamily: `${preferences.fontFamily}, 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace` }
+                    "&": { fontFamily: `${preferences.fontFamily}, monospace` },
+                    ".cm-scroller": { fontFamily: `${preferences.fontFamily}, monospace` },
+                    ".cm-content": { fontFamily: `${preferences.fontFamily}, monospace` }
                   })
                 ]}
                 onChange={(val) => setCode(val)}

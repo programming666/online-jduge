@@ -4,6 +4,7 @@
        url('/static/fonts/CascadiaCode/CascadiaCode.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -12,6 +13,7 @@
        url('/static/fonts/FiraCode/FiraCode-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -20,6 +22,7 @@
        url('/static/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -27,6 +30,7 @@
   src: url('/static/fonts/Monaspace/MonaspaceNeon-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -34,6 +38,7 @@
   src: url('/static/fonts/AnonymousPro/AnonymousPro-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -41,6 +46,7 @@
   src: url('/static/fonts/Hack/Hack-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Fallbacks and system fonts are handled in CSS logic, but we can define them here if we have local copies */
