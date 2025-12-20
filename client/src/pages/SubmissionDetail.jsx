@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,10 @@ import { cpp } from '@codemirror/lang-cpp';
 import { python } from '@codemirror/lang-python';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import * as Diff from 'diff';
+import { EditorView } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { indentUnit } from '@codemirror/language';
+import { useUserUI } from '../context/UserUIContext';
 
 const API_URL = '/api';
 
@@ -64,11 +68,13 @@ const DiffViewer = ({ actual, expected }) => {
 function SubmissionDetail() {
   const { id } = useParams();
   const { t } = useTranslation();
+  const { preferences, isDark } = useUserUI();
   const [submission, setSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('tests');
   const [showDetails, setShowDetails] = useState(false);
+  const [debouncedPreferences, setDebouncedPreferences] = useState(preferences);
 
   useEffect(() => {
     fetchSubmission();
@@ -94,6 +100,63 @@ function SubmissionDetail() {
       setActiveTab('code');
     }
   }, [hasTestCases]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPreferences(preferences);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [preferences]);
+
+  const editorExtensions = useMemo(() => {
+    if (!submission) return [];
+    const lineHeight = debouncedPreferences.lineHeight || 1.5;
+    const color = isDark ? '#e5e7eb' : '#111827';
+    return [
+      submission.language === 'cpp' ? cpp() : python(),
+      indentUnit.of(" ".repeat(debouncedPreferences.tabSize)),
+      EditorState.tabSize.of(debouncedPreferences.tabSize),
+      EditorView.theme({
+        "&": {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+        },
+        ".cm-scroller": {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+        },
+        ".cm-content": {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+        }
+      })
+    ];
+  }, [submission, debouncedPreferences, isDark]);
+
+  const editorStyle = useMemo(() => {
+    const lineHeight = debouncedPreferences.lineHeight || 1.5;
+    const color = isDark ? '#e5e7eb' : '#111827';
+    return {
+      fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+      fontSize: `${debouncedPreferences.fontSize}px`,
+      lineHeight,
+      color,
+      transition:
+        'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+    };
+  }, [debouncedPreferences, isDark]);
 
   if (loading) return <div className="p-8 text-center">{t('common.loading')}</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -249,14 +312,20 @@ function SubmissionDetail() {
           {activeTab === 'code' && (
             <div>
               <h3 className="font-semibold text-gray-700 mb-2">{t('submission.detail.sourceCode')}:</h3>
-              <div className="border rounded overflow-hidden">
+              <div className="border rounded overflow-hidden" style={editorStyle}>
                 <CodeMirror
                   value={submission.code}
                   height="auto"
-                  theme={dracula}
-                  extensions={[submission.language === 'cpp' ? cpp() : python()]}
+                  theme={isDark ? dracula : 'light'}
+                  extensions={editorExtensions}
                   readOnly={true}
                   editable={false}
+                  basicSetup={{
+                    lineNumbers: debouncedPreferences.lineNumbers,
+                    foldGutter: debouncedPreferences.foldGutter,
+                    bracketMatching: debouncedPreferences.matchBrackets,
+                    tabSize: debouncedPreferences.tabSize,
+                  }}
                 />
               </div>
             </div>

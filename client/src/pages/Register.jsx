@@ -21,8 +21,10 @@ function Register() {
       try {
         const res = await axios.get(`${API_URL}/settings/turnstile`);
         setTurnstileEnabled(!!res.data.enabled);
-        const key = res.data.siteKey || import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY || '';
-        setSiteKey(key);
+        const k = res.data?.siteKey;
+        const fromApi = typeof k === 'string' ? k.trim() : '';
+        const fromEnv = typeof import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY === 'string' ? import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY.trim() : '';
+        setSiteKey(fromApi || fromEnv);
       } catch (_) {}
     };
     load();
@@ -30,6 +32,10 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (turnstileEnabled && !cfToken) {
+      setError('请先完成人机验证');
+      return;
+    }
     try {
       await axios.post(`${API_URL}/auth/register`, { username, password, role, cfToken: cfToken });
       navigate('/login');

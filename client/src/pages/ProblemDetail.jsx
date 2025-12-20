@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import CodeMirror from '@uiw/react-codemirror';
@@ -27,10 +27,11 @@ function ProblemDetail() {
   const { preferences, isDark } = useUserUI();
   const { t } = useTranslation();
   const [problem, setProblem] = useState(null);
-  const [code, setCode] = useState('// Write your solution here\n#include <iostream>\n\nint main() {\n    return 0;\n}');
+  const [code, setCode] = useState('');
   const [language, setLanguage] = useState('cpp');
   const [submitting, setSubmitting] = useState(false);
   const [contestLanguages, setContestLanguages] = useState([]);
+  const [debouncedPreferences, setDebouncedPreferences] = useState(preferences);
 
   useEffect(() => {
     const load = async () => {
@@ -53,11 +54,6 @@ function ProblemDetail() {
           if (!data.languages.includes(language)) {
             const nextLang = data.languages.includes('cpp') ? 'cpp' : data.languages[0];
             setLanguage(nextLang);
-            if (nextLang === 'cpp') {
-              setCode('// Write your solution here\n#include <iostream>\n\nint main() {\n    return 0;\n}');
-            } else if (nextLang === 'python') {
-              setCode('# Write your solution here\nimport sys\n\n# Read from stdin');
-            }
           }
         }
       } catch (err) {
@@ -75,12 +71,63 @@ function ProblemDetail() {
       return;
     }
     setLanguage(lang);
-    if (lang === 'cpp') {
-      setCode('');
-    } else {
-      setCode('# Write your solution here\nimport sys\n\n# Read from stdin');
-    }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPreferences(preferences);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [preferences]);
+
+  const editorExtensions = useMemo(() => {
+    const lineHeight = debouncedPreferences.lineHeight || 1.5;
+    const color = isDark ? '#e5e7eb' : '#111827';
+    return [
+      language === 'cpp' ? cpp() : python(),
+      indentUnit.of(" ".repeat(debouncedPreferences.tabSize)),
+      EditorState.tabSize.of(debouncedPreferences.tabSize),
+      EditorView.theme({
+        "&": {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+        },
+        ".cm-scroller": {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+        },
+        ".cm-content": {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+        }
+      })
+    ];
+  }, [language, debouncedPreferences, isDark]);
+
+  const editorStyle = useMemo(() => {
+    const lineHeight = debouncedPreferences.lineHeight || 1.5;
+    const color = isDark ? '#e5e7eb' : '#111827';
+    return {
+      fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+      fontSize: `${debouncedPreferences.fontSize}px`,
+      lineHeight,
+      color,
+      transition:
+        'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
+    };
+  }, [debouncedPreferences, isDark]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -181,36 +228,31 @@ function ProblemDetail() {
             </select>
         </div>
         
-        <div className="flex-grow border border-gray-300 rounded overflow-auto min-h-0" style={{ fontFamily: `${preferences.fontFamily}, 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace`, fontSize: `${preferences.fontSize}px` }}>
+        <div
+          className="flex-grow border border-gray-300 rounded overflow-auto min-h-0"
+          style={editorStyle}
+        >
             <CodeMirror
+                key={`${debouncedPreferences.fontFamily}-${debouncedPreferences.fontSize}-${debouncedPreferences.tabSize}`}
                 value={code}
                 height="100%"
                 minHeight="200px"
                 maxHeight="100%"
-                extensions={[
-                  language === 'cpp' ? cpp() : python(),
-                  indentUnit.of(" ".repeat(preferences.tabSize)),
-                  EditorState.tabSize.of(preferences.tabSize),
-                  EditorView.theme({
-                    "&": { fontFamily: `${preferences.fontFamily}, monospace` },
-                    ".cm-scroller": { fontFamily: `${preferences.fontFamily}, monospace` },
-                    ".cm-content": { fontFamily: `${preferences.fontFamily}, monospace` }
-                  })
-                ]}
+                extensions={editorExtensions}
                 onChange={(val) => setCode(val)}
                 theme={isDark ? dracula : 'light'}
                 basicSetup={{
-                  lineNumbers: preferences.lineNumbers,
+                  lineNumbers: debouncedPreferences.lineNumbers,
                   highlightActiveLineGutter: true,
                   highlightSpecialChars: true,
                   history: true,
-                  foldGutter: preferences.foldGutter,
+                  foldGutter: debouncedPreferences.foldGutter,
                   drawSelection: true,
                   dropCursor: true,
                   allowMultipleSelections: true,
                   indentOnInput: true,
                   syntaxHighlighting: true,
-                  bracketMatching: preferences.matchBrackets,
+                  bracketMatching: debouncedPreferences.matchBrackets,
                   closeBrackets: true,
                   autocompletion: true,
                   rectangularSelection: true,
@@ -224,7 +266,7 @@ function ProblemDetail() {
                   foldKeymap: true,
                   completionKeymap: true,
                   lintKeymap: true,
-                  tabSize: preferences.tabSize,
+                  tabSize: debouncedPreferences.tabSize,
                 }}
             />
         </div>

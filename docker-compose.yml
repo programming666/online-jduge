@@ -35,6 +35,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/onlinejudge?schema=public
       - PORT=3000
       - JUDGE_IMAGE=judge-runner:latest
+    env_file:
+      - ./server-go/.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # Mount the judger image if needed, or rely on it being present in host docker
