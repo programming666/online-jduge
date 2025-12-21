@@ -35,15 +35,7 @@
 
 @font-face {
   font-family: 'Anonymous Pro';
-  src: url('/static/fonts/AnonymousPro/AnonymousPro-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Hack';
-  src: url('/static/fonts/Hack/Hack-Regular.ttf') format('truetype');
+  src: url('/static/fonts/AnonymousPro/Anonymous_Pro.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

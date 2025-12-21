@@ -83,37 +83,42 @@ function ProblemDetail() {
   const editorExtensions = useMemo(() => {
     const lineHeight = debouncedPreferences.lineHeight || 1.5;
     const color = isDark ? '#e5e7eb' : '#111827';
-    return [
+    const exts = [
       language === 'cpp' ? cpp() : python(),
-      indentUnit.of(" ".repeat(debouncedPreferences.tabSize)),
+      indentUnit.of(' '.repeat(debouncedPreferences.tabSize)),
       EditorState.tabSize.of(debouncedPreferences.tabSize),
-      EditorView.theme({
-        "&": {
-          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
-          fontSize: `${debouncedPreferences.fontSize}px`,
-          lineHeight,
-          color,
-          transition:
-            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
-        },
-        ".cm-scroller": {
-          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
-          fontSize: `${debouncedPreferences.fontSize}px`,
-          lineHeight,
-          color,
-          transition:
-            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
-        },
-        ".cm-content": {
-          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
-          fontSize: `${debouncedPreferences.fontSize}px`,
-          lineHeight,
-          color,
-          transition:
-            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease'
-        }
-      })
     ];
+
+    exts.push(
+      EditorView.theme({
+        '&': {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease',
+        },
+        '.cm-scroller': {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease',
+        },
+        '.cm-content': {
+          fontFamily: `${debouncedPreferences.fontFamily}, monospace`,
+          fontSize: `${debouncedPreferences.fontSize}px`,
+          lineHeight,
+          color,
+          transition:
+            'font-size 300ms ease, font-family 300ms ease, line-height 300ms ease, color 300ms ease',
+        },
+      }),
+    );
+
+    return exts;
   }, [language, debouncedPreferences, isDark]);
 
   const editorStyle = useMemo(() => {

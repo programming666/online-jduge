@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUserUI } from '../context/UserUIContext';
 import CodeMirror from '@uiw/react-codemirror';
@@ -11,7 +11,7 @@ import { indentUnit } from '@codemirror/language';
 
 function UserPreferences() {
   const { t } = useTranslation();
-  const { preferences, updatePreferences } = useUserUI();
+  const { preferences, updatePreferences, isDark } = useUserUI();
   const [previewLang, setPreviewLang] = useState('cpp');
   const [saveStatus, setSaveStatus] = useState(''); // '', 'saving', 'saved', 'error'
 
@@ -22,7 +22,6 @@ function UserPreferences() {
     { name: 'Consolas', value: 'Consolas' },
     { name: 'Monaspace Neon', value: 'Monaspace Neon' },
     { name: 'Anonymous Pro', value: 'Anonymous Pro' },
-    { name: 'Hack', value: 'Hack' },
     { name: 'System Default', value: 'monospace' }
   ];
 
@@ -74,19 +73,19 @@ function UserPreferences() {
     if (previewLang === 'cpp') exts.push(cpp());
     if (previewLang === 'python') exts.push(python());
 
-    // Dynamic settings
     exts.push(indentUnit.of(" ".repeat(preferences.tabSize)));
     exts.push(EditorState.tabSize.of(preferences.tabSize));
-    exts.push(EditorView.theme({
-      "&": { fontFamily: preferences.fontFamily },
-      ".cm-scroller": { fontFamily: preferences.fontFamily },
-      ".cm-content": { fontFamily: preferences.fontFamily }
-    }));
+
+    exts.push(
+      EditorView.theme({
+        '&': { fontFamily: preferences.fontFamily },
+        '.cm-scroller': { fontFamily: preferences.fontFamily },
+        '.cm-content': { fontFamily: preferences.fontFamily },
+      }),
+    );
 
     return exts;
   };
-
-  const isDark = preferences.theme === 'dark' || (preferences.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const previewCode = {
     cpp: `#include <iostream>
@@ -209,7 +208,10 @@ if __name__ == "__main__":
               <option value="python">Python</option>
             </select>
           </div>
-          <div className="border rounded-md overflow-hidden" style={{ fontFamily: preferences.fontFamily, fontSize: `${preferences.fontSize}px` }}>
+          <div
+            className="border rounded-md overflow-hidden"
+            style={{ fontFamily: preferences.fontFamily, fontSize: `${preferences.fontSize}px` }}
+          >
             <CodeMirror
               value={previewCode[previewLang]}
               height="300px"
