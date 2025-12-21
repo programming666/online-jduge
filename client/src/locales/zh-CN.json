@@ -148,6 +148,13 @@
       "updateSuccess": "速率限制更新成功",
       "updateFailed": "速率限制更新失败"
     },
+    "codeRunRateLimit": {
+      "title": "代码测试速率限制",
+      "description": "设置每个用户每分钟最多可执行的代码测试次数。",
+      "label": "每分钟最大测试次数",
+      "updateSuccess": "测试速率限制更新成功",
+      "updateFailed": "测试速率限制更新失败"
+    },
     "userManagement": {
       "title": "用户管理",
       "description": "管理系统用户，包括封禁、删除用户等操作。",
@@ -222,6 +229,67 @@
         "load": "加载IP封禁列表失败"
       },
       "noIPs": "暂无封禁IP"
+    },
+    "userAccess": {
+      "title": "访问历史与IP关系",
+      "userSearchLabel": "用户搜索",
+      "userSearchPlaceholder": "输入用户ID或用户名...",
+      "userSearchHint": "仅数字视为用户ID精确匹配，其他按用户名模糊搜索。",
+      "dateRangeLabel": "时间范围",
+      "dateRangeHint": "默认最近30天，最大查询范围为1年。",
+      "quickActions": "查询操作",
+      "queryButton": "查询",
+      "resetButton": "重置",
+      "securityNote": "仅管理员可见，所有操作都会被记录。",
+      "tableTitle": "访问记录明细",
+      "currentUserLabel": "当前用户：#{{id}} {{username}}",
+      "ipFilterPlaceholder": "按IP筛选",
+      "typeFilterPlaceholder": "按操作类型筛选",
+      "columns": {
+        "createdAt": "访问时间",
+        "ip": "IP地址",
+        "location": "地理位置",
+        "device": "访问设备",
+        "accessType": "操作类型"
+      },
+      "empty": "暂无访问记录",
+      "exportCSV": "导出CSV",
+      "exportExcel": "导出Excel",
+      "trendTitle": "每日访问趋势",
+      "mapTitle": "地理分布热力图",
+      "selectedCountryLabel": "当前区域：{{country}}",
+      "suspiciousTitle": "可疑IP自动检测",
+      "suspiciousDesc": "总访问 {{total}} 次，涉及 {{countryCount}} 个国家/地区",
+      "banButton": "一键封禁",
+      "confirmBanIp": "确定要封禁IP {{ip}} 吗？此操作会影响该IP所有访问。",
+      "confirmBanWithoutTurnstile": "当前未启用人机验证，仍要直接封禁IP {{ip}} 吗？",
+      "autoBanReason": "系统根据访问异常自动封禁",
+      "banSuccess": "IP封禁操作已提交",
+      "banFailed": "封禁IP失败",
+      "noSuspicious": "当前查询范围内未发现明显可疑IP。",
+      "tagButton": "标记",
+      "tagListTitle": "IP标记监控列表",
+      "tagListEmpty": "暂无标记IP。",
+      "tagEdit": "编辑",
+      "tagRemove": "移除",
+      "tagDialogTitle": "标记IP {{ip}}",
+      "tagLabels": "分类标签",
+      "tagLabelsPlaceholder": "使用逗号分隔多个标签，例如：爬虫, 攻击疑似",
+      "tagReason": "标记原因",
+      "tagReasonPlaceholder": "请填写标记该IP的原因，此项为必填。",
+      "tagSave": "保存标记",
+      "error": {
+        "userRequired": "请先输入用户ID或用户名。",
+        "userNotFound": "未找到匹配的用户，请检查输入。",
+        "dateRequired": "请选择起止时间。",
+        "dateInvalid": "时间格式不正确。",
+        "dateOrder": "开始时间不能晚于结束时间。",
+        "dateTooLong": "时间范围不能超过1年。",
+        "fetchFailed": "加载访问历史失败。",
+        "turnstileRequired": "请先完成人机验证后再执行封禁操作。",
+        "turnstileFailed": "人机验证失败，请重试。",
+        "tagReasonRequired": "请填写标记原因。"
+      }
     }
   },
   "contest": {
@@ -248,6 +316,7 @@
       "name": "比赛名称",
       "actions": "操作",
       "join": "参加",
+      "view": "查看",
       "pagination": "第 {{page}} 页 / 共 {{totalPages}} 页",
       "prev": "上一页",
       "next": "下一页"
@@ -379,6 +448,14 @@
     "cpp": "C++ (G++ 13+)",
     "python": "Python 3"
   },
+  "problemTest": {
+    "inputTitle": "自定义输入",
+    "outputTitle": "运行结果",
+    "runButton": "运行代码",
+    "noOutput": "暂无输出",
+    "rateLimited": "测试过于频繁，请稍后再试。",
+    "error": "代码运行出错"
+  },
   "error": {
     "404": {
       "title": "404 - 页面未找到",
@@ -397,6 +474,24 @@
     "sidebar": {
       "collapse": "收起侧边栏",
       "expand": "展开侧边栏"
+    },
+    "systemStatus": {
+      "title": "系统内存状态",
+      "containerLabel": "容器ID：{{id}}",
+      "cgroupMemory": "容器内存使用",
+      "hostMemory": "宿主机内存使用",
+      "notAvailable": "暂无数据",
+      "refreshInterval": "刷新间隔",
+      "refreshNow": "立即刷新",
+      "trendTitle": "最近1小时内存使用趋势",
+      "trendSubtitle": "展示容器内存使用率变化",
+      "status": {
+        "normal": "正常",
+        "throttled": "内存限流中"
+      },
+      "error": {
+        "load": "获取系统状态失败"
+      }
     }
   }
   ,

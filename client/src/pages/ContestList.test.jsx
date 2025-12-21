@@ -46,7 +46,8 @@ describe('ContestList', () => {
             endTime: new Date(Date.now() + 3600000).toISOString(),
             rule: 'OI',
             participantCount: 5,
-            hasPassword: true
+            hasPassword: true,
+            joined: false
           }
         ],
         page: 1,
@@ -79,7 +80,8 @@ describe('ContestList', () => {
             endTime: new Date(Date.now() + 3600000).toISOString(),
             rule: 'ACM',
             participantCount: 10,
-            hasPassword: true
+            hasPassword: true,
+            joined: false
           }
         ],
         page: 1,
@@ -124,7 +126,8 @@ describe('ContestList', () => {
             endTime: new Date(Date.now() + 3600000).toISOString(),
             rule: 'OI',
             participantCount: 0,
-            hasPassword: true
+            hasPassword: true,
+            joined: false
           }
         ],
         page: 1,
@@ -153,5 +156,53 @@ describe('ContestList', () => {
     await userEvent.click(submitButton)
 
     expect(await screen.findByText('Wrong password')).toBeInTheDocument()
+  })
+
+  test('shows view button for finished contests when joined and disables join otherwise', async () => {
+    const now = Date.now()
+
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        items: [
+          {
+            id: 4,
+            name: 'Finished Joined',
+            description: '',
+            startTime: new Date(now - 7200000).toISOString(),
+            endTime: new Date(now - 3600000).toISOString(),
+            rule: 'OI',
+            participantCount: 10,
+            hasPassword: true,
+            joined: true
+          },
+          {
+            id: 5,
+            name: 'Finished Not Joined',
+            description: '',
+            startTime: new Date(now - 7200000).toISOString(),
+            endTime: new Date(now - 3600000).toISOString(),
+            rule: 'ACM',
+            participantCount: 5,
+            hasPassword: true,
+            joined: false
+          }
+        ],
+        page: 1,
+        pageSize: 10,
+        total: 2
+      }
+    })
+
+    render(<ContestList />)
+
+    expect(await screen.findByText('Finished Joined')).toBeInTheDocument()
+    expect(await screen.findByText('Finished Not Joined')).toBeInTheDocument()
+
+    const viewButtons = screen.getAllByText('contest.list.view')
+    expect(viewButtons.length).toBeGreaterThanOrEqual(1)
+
+    const joinButtons = screen.getAllByText('contest.list.join')
+    const disabledJoin = joinButtons.find((btn) => btn.hasAttribute('disabled'))
+    expect(disabledJoin).toBeDefined()
   })
 })

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Card from '../components/ui/Card';
 
 const API_URL = '/api';
 
@@ -27,11 +28,11 @@ function SubmissionList() {
   const getStatusColor = (status) => {
     const normalizedStatus = status.toLowerCase().replace(/\s+/g, '');
     switch (normalizedStatus) {
-      case 'accepted': return 'text-green-600 bg-green-100';
-      case 'wronganswer': return 'text-red-600 bg-red-100';
-      case 'pending': return 'text-yellow-600 bg-yellow-100';
-      case 'timelimitexceeded': return 'text-orange-600 bg-orange-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'accepted': return 'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30 border-green-200 dark:border-green-800';
+      case 'wronganswer': return 'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900/30 border-red-200 dark:border-red-800';
+      case 'pending': return 'text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800';
+      case 'timelimitexceeded': return 'text-orange-700 bg-orange-100 dark:text-orange-300 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800';
+      default: return 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-800 border-gray-200 dark:border-gray-700';
     }
   };
 
@@ -50,62 +51,91 @@ function SubmissionList() {
   };
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold mb-6 text-primary border-b-4 border-secondary inline-block pb-1">{t('submission.list.title')}</h2>
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-200">
-        <table className="min-w-full leading-normal">
-          <thead>
-            <tr>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.id')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.time')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.user')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.problem')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.status')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.timeUsed')}</th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t('submission.list.language')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {submissions?.map(sub => (
-              <tr key={sub.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-bold text-primary dark:text-blue-400">
-                    <Link to={`/submission/${sub.id}`} className="hover:underline">#{sub.id}</Link>
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(sub.createdAt).toLocaleString()}
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200">
-                    {sub.user?.username || t('submission.list.anonymous')}
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-blue-400">
-                  <Link to={`/problem/${sub.problemId}`} className="hover:underline">{sub.problem?.title}</Link>
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm">
-                  <span className={`px-2 py-1 rounded-full font-semibold text-xs ${getStatusColor(sub.status)}`}>
-                    {translateStatus(sub.status)}
-                  </span>
-                  {sub.status !== 'Accepted' && sub.status !== 'Pending' && (
-                      <div className="text-xs text-gray-400 mt-1 truncate max-w-xs" title={sub.output}>
-                          {sub.output?.substring(0, 50)}
-                      </div>
-                  )}
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
-                    {sub.timeUsed !== null ? `${sub.timeUsed} ${t('common.unit.ms')}` : '-'}
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300 uppercase">
-                    {sub.language}
-                </td>
-              </tr>
-            ))}
-             {submissions.length === 0 && (
-              <tr>
-                <td colSpan="6" className="px-5 py-5 text-center text-gray-500">{t('submission.list.noSubmissions')}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+    <div className="container mx-auto px-4 py-8 max-w-7xl animate-fade-in">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+          <span className="w-1.5 h-8 bg-primary rounded-full"></span>
+          {t('submission.list.title')}
+        </h2>
       </div>
+
+      <Card className="shadow-card overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full leading-normal">
+            <thead>
+              <tr>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                  {t('submission.list.id')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('submission.list.time')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('submission.list.user')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('submission.list.problem')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('submission.list.status')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('submission.list.timeUsed')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('submission.list.language')}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {submissions?.map(sub => (
+                <tr key={sub.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-primary dark:text-blue-400">
+                      <Link to={`/submission/${sub.id}`} className="hover:underline hover:text-primary-hover">#{sub.id}</Link>
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
+                      {new Date(sub.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200 font-medium">
+                      {sub.user?.username || t('submission.list.anonymous')}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-primary dark:text-blue-400 font-medium">
+                    <Link to={`/problem/${sub.problemId}`} className="hover:underline hover:text-primary-hover">{sub.problem?.title}</Link>
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(sub.status)}`}>
+                      {translateStatus(sub.status)}
+                    </span>
+                    {sub.status !== 'Accepted' && sub.status !== 'Pending' && (
+                        <div className="text-xs text-gray-400 mt-1 truncate max-w-xs pl-1" title={sub.output}>
+                            {sub.output?.substring(0, 50)}
+                        </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300 font-mono">
+                      {sub.timeUsed !== null ? `${sub.timeUsed} ${t('common.unit.ms')}` : '-'}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300 font-mono">
+                      {sub.language}
+                  </td>
+                </tr>
+              ))}
+               {submissions.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <svg className="w-12 h-12 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                      <span className="text-sm font-medium">{t('submission.list.noSubmissions')}</span>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }

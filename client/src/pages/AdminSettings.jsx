@@ -14,11 +14,13 @@ function AdminSettings({ embedded = false }) {
   const [homeContent, setHomeContent] = useState('');
   const [footerContent, setFooterContent] = useState('');
   const [rateLimit, setRateLimit] = useState(3);
+  const [codeRunLimit, setCodeRunLimit] = useState(6);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [homeMessage, setHomeMessage] = useState('');
   const [footerMessage, setFooterMessage] = useState('');
   const [rateLimitMessage, setRateLimitMessage] = useState('');
+  const [codeRunLimitMessage, setCodeRunLimitMessage] = useState('');
   const [turnEnabled, setTurnEnabled] = useState(false);
   const [siteKey, setSiteKey] = useState('');
   const [secretConfigured, setSecretConfigured] = useState(false);
@@ -29,17 +31,19 @@ function AdminSettings({ embedded = false }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [regRes, homeRes, footerRes, rateLimitRes, turnRes] = await Promise.all([
+        const [regRes, homeRes, footerRes, rateLimitRes, turnRes, codeRunLimitRes] = await Promise.all([
           axios.get(`${API_URL}/settings/registration`),
           axios.get(`${API_URL}/settings/homepage`),
           axios.get(`${API_URL}/settings/footer`),
           axios.get(`${API_URL}/settings/rate-limit`),
           axios.get(`${API_URL}/settings/turnstile`),
+          axios.get(`${API_URL}/settings/code-run-rate-limit`),
         ]);
         setEnabled(!!regRes.data.enabled);
         setHomeContent(homeRes.data.content || '');
         setFooterContent(footerRes.data.content || '');
         setRateLimit(rateLimitRes.data.limit || 3);
+        setCodeRunLimit(codeRunLimitRes.data.limit || 6);
         setTurnEnabled(!!turnRes.data.enabled);
         setSiteKey(turnRes.data.siteKey || '');
         setSecretConfigured(!!turnRes.data.secretConfigured);
@@ -109,6 +113,20 @@ function AdminSettings({ embedded = false }) {
       setRateLimitMessage(t('settings.rateLimit.updateSuccess'));
     } catch (e) {
       setError(e.response?.data?.error || t('settings.rateLimit.updateFailed'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveCodeRunLimit = async () => {
+    setSaving(true);
+    setError('');
+    setCodeRunLimitMessage('');
+    try {
+      await axios.put(`${API_URL}/settings/code-run-rate-limit`, { limit: parseInt(codeRunLimit, 10) });
+      setCodeRunLimitMessage(t('settings.codeRunRateLimit.updateSuccess'));
+    } catch (e) {
+      setError(e.response?.data?.error || t('settings.codeRunRateLimit.updateFailed'));
     } finally {
       setSaving(false);
     }
@@ -295,6 +313,36 @@ function AdminSettings({ embedded = false }) {
         </div>
 
         {rateLimitMessage && <div className="mt-3 text-sm text-green-600 dark:text-green-400">{rateLimitMessage}</div>}
+      </section>
+
+      {/* Code Run Rate Limit */}
+      <section className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{t('settings.codeRunRateLimit.title')}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.codeRunRateLimit.description')}</p>
+
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('settings.codeRunRateLimit.label')}:
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="60"
+            value={codeRunLimit}
+            onChange={(e) => setCodeRunLimit(e.target.value)}
+            className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="button"
+            onClick={handleSaveCodeRunLimit}
+            disabled={saving}
+            className="px-4 py-2 bg-primary dark:bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
+          >
+            {saving ? t('common.loading') : t('common.save')}
+          </button>
+        </div>
+
+        {codeRunLimitMessage && <div className="mt-3 text-sm text-green-600 dark:text-green-400">{codeRunLimitMessage}</div>}
       </section>
 
       <hr className="my-8 border-gray-200 dark:border-gray-700" />

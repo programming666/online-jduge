@@ -16,6 +16,9 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import Button from '../components/ui/Button';
+import Select from '../components/ui/Select';
+import Card from '../components/ui/Card';
 
 const API_URL = '/api';
 
@@ -35,6 +38,11 @@ function ContestProblem() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [debouncedPreferences, setDebouncedPreferences] = useState(preferences);
+  const [testInput, setTestInput] = useState('');
+  const [testOutput, setTestOutput] = useState('');
+  const [testStatus, setTestStatus] = useState('');
+  const [testError, setTestError] = useState('');
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -182,121 +190,201 @@ function ContestProblem() {
   const ended = contest && contest.rule === 'OI' && (new Date() > new Date(contest.endTime));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-3xl font-bold text-primary">{problem.title}</h2>
-          <div className="flex items-center gap-3">
-            <Link to={`/contest/${id}`} className="text-primary hover:text-blue-700 text-sm">
-              {t('contest.detail.backToList')}
-            </Link>
-            <Link
-              to={`/contest/${id}/leaderboard`}
-              className="px-4 py-2 bg-primary text-white rounded shadow text-sm hover:bg-blue-600"
-            >
-              {t('contest.leaderboard.button', { defaultValue: t('contest.leaderboard.title', { defaultValue: '排行榜' }) })}
-            </Link>
+    <div className="min-h-[calc(100vh-5rem)] flex flex-col gap-4">
+      <Card className="flex-none overflow-y-auto border border-gray-200">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-primary">{problem.title}</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link to={`/contest/${id}`} className="text-primary hover:text-blue-700 text-sm">
+                {t('contest.detail.backToList')}
+              </Link>
+              <Link
+                to={`/contest/${id}/leaderboard`}
+                className="px-4 py-2 bg-primary text-white rounded shadow text-sm hover:bg-blue-600"
+              >
+                {t('contest.leaderboard.button', { defaultValue: t('contest.leaderboard.title', { defaultValue: '排行榜' }) })}
+              </Link>
+            </div>
           </div>
-        </div>
 
-        {contest && (
-          <div className="mb-4 text-sm">
-            <span className="font-semibold mr-2">{t('contest.detail.status', { defaultValue: 'Status' })}:</span>
-            <span className={ended ? 'text-red-700 font-semibold' : 'text-green-700 font-semibold'}>
-              {ended ? t('contest.detail.ended', { defaultValue: '已结束' }) : t('contest.detail.ongoing', { defaultValue: '进行中' })}
+          {contest && (
+            <div className="mb-4 text-xs md:text-sm">
+              <span className="font-semibold mr-2">{t('contest.detail.status', { defaultValue: 'Status' })}:</span>
+              <span className={ended ? 'text-red-700 font-semibold' : 'text-green-700 font-semibold'}>
+                {ended ? t('contest.detail.ended', { defaultValue: '已结束' }) : t('contest.detail.ongoing', { defaultValue: '进行中' })}
+              </span>
+            </div>
+          )}
+
+          <div className="mb-4 text-xs md:text-sm text-gray-600 dark:text-gray-300 space-x-0 md:space-x-4 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded flex flex-col md:flex-row gap-2 md:gap-4">
+            <span>
+              {t('problem.detail.timeLimit')}: <strong>{problem.timeLimit} {t('common.unit.ms')}</strong>
+            </span>
+            <span>
+              {t('problem.detail.memoryLimit')}: <strong>{problem.memoryLimit} {t('common.unit.mb')}</strong>
             </span>
           </div>
-        )}
 
-        <div className="mb-4 text-sm text-gray-600 space-x-4 bg-yellow-50 p-3 rounded">
-          <span>
-            {t('problem.detail.timeLimit')}: <strong>{problem.timeLimit} {t('common.unit.ms')}</strong>
-          </span>
-          <span>
-            {t('problem.detail.memoryLimit')}: <strong>{problem.memoryLimit} {t('common.unit.mb')}</strong>
-          </span>
-        </div>
-
-        <div className="prose max-w-none">
-          <h3 className="text-xl font-semibold mb-2 text-secondary">{t('problem.detail.description')}</h3>
-          <div className="text-gray-700 bg-gray-50 p-4 rounded border border-gray-200">
-            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml={true}>
-              {problem.description || ''}
-            </ReactMarkdown>
+          <div className="prose max-w-none">
+            <h3 className="text-lg md:text-xl font-semibold mb-2 text-secondary">{t('problem.detail.description')}</h3>
+            <div className="text-gray-700 bg-gray-50 p-4 rounded border border-gray-200">
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml={true}>
+                {problem.description || ''}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200 flex flex-col h-[600px]">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-gray-700">{t('problem.detail.codeEditor')}</h3>
-          <select
-            value={language}
-            onChange={handleLanguageChange}
-            className="border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+      <div className="flex-1 min-h-0 flex flex-col gap-4">
+        <Card className="flex-1 min-h-0 flex flex-col border border-gray-200">
+          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-base md:text-lg font-semibold text-gray-700">
+              {t('problem.detail.codeEditor')}
+            </h3>
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            >
+              {(!contestLanguages.length || contestLanguages.includes('cpp')) && (
+                <option value="cpp">{t('language.cpp')}</option>
+              )}
+              {(!contestLanguages.length || contestLanguages.includes('python')) && (
+                <option value="python">{t('language.python')}</option>
+              )}
+            </select>
+          </div>
+
+          <div
+            className="flex-1 min-h-0 border-t border-gray-200"
+            style={editorStyle}
           >
-            {(!contestLanguages.length || contestLanguages.includes('cpp')) && (
-              <option value="cpp">{t('language.cpp')}</option>
-            )}
-            {(!contestLanguages.length || contestLanguages.includes('python')) && (
-              <option value="python">{t('language.python')}</option>
-            )}
-          </select>
-        </div>
+            <CodeMirror
+              value={code}
+              height="100%"
+              minHeight="200px"
+              maxHeight="100%"
+              extensions={editorExtensions}
+              onChange={(val) => setCode(val)}
+              theme={isDark ? dracula : 'light'}
+              basicSetup={{
+                lineNumbers: debouncedPreferences.lineNumbers,
+                highlightActiveLineGutter: true,
+                highlightSpecialChars: true,
+                history: true,
+                foldGutter: true,
+                drawSelection: true,
+                dropCursor: true,
+                allowMultipleSelections: true,
+                indentOnInput: true,
+                syntaxHighlighting: true,
+                bracketMatching: debouncedPreferences.matchBrackets,
+                closeBrackets: true,
+                autocompletion: true,
+                rectangularSelection: true,
+                crosshairCursor: true,
+                highlightActiveLine: true,
+                highlightSelectionMatches: true,
+                closeBracketsKeymap: true,
+                defaultKeymap: true,
+                searchKeymap: true,
+                historyKeymap: true,
+                foldKeymap: true,
+                completionKeymap: true,
+                lintKeymap: true,
+                tabSize: debouncedPreferences.tabSize,
+              }}
+            />
+          </div>
 
-        <div
-          className="flex-grow border border-gray-300 rounded overflow-auto min-h-0"
-          style={editorStyle}
-        >
-          <CodeMirror
-            value={code}
-            height="100%"
-            minHeight="200px"
-            maxHeight="100%"
-            extensions={editorExtensions}
-            onChange={(val) => setCode(val)}
-            theme={isDark ? dracula : 'light'}
-            basicSetup={{
-              lineNumbers: debouncedPreferences.lineNumbers,
-              highlightActiveLineGutter: true,
-              highlightSpecialChars: true,
-              history: true,
-              foldGutter: true,
-              drawSelection: true,
-              dropCursor: true,
-              allowMultipleSelections: true,
-              indentOnInput: true,
-              syntaxHighlighting: true,
-              bracketMatching: debouncedPreferences.matchBrackets,
-              closeBrackets: true,
-              autocompletion: true,
-              rectangularSelection: true,
-              crosshairCursor: true,
-              highlightActiveLine: true,
-              highlightSelectionMatches: true,
-              closeBracketsKeymap: true,
-              defaultKeymap: true,
-              searchKeymap: true,
-              historyKeymap: true,
-              foldKeymap: true,
-              completionKeymap: true,
-              lintKeymap: true,
-              tabSize: debouncedPreferences.tabSize,
-            }}
-          />
-        </div>
+          <div className="px-4 py-3 border-t border-gray-200 flex justify-end">
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting || ended}
+              loading={submitting}
+            >
+              {ended
+                ? t('contest.detail.ended', { defaultValue: '比赛已结束' })
+                : (submitting ? t('problem.detail.submitting') : t('problem.detail.submitSolution'))
+              }
+            </Button>
+          </div>
+        </Card>
 
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={handleSubmit}
-            disabled={submitting || ended}
-            className="bg-primary hover:bg-blue-600 text-white font-bold py-2 px-6 rounded shadow-md transition-colors disabled:opacity-50"
-          >
-            {ended
-              ? t('contest.detail.ended', { defaultValue: '比赛已结束' })
-              : (submitting ? t('problem.detail.submitting') : t('problem.detail.submitSolution'))
-            }
-          </button>
+        <div className="flex-none h-64 md:h-72 flex flex-col md:flex-row gap-4">
+          <Card className="flex-1 flex flex-col border border-gray-200">
+            <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-700">
+                {t('problemTest.inputTitle')}
+              </span>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  setTestError('');
+                  setTestStatus('');
+                  setTesting(true);
+                  setTestOutput('');
+                  try {
+                    const res = await axios.post(`${API_URL}/run`, {
+                      problemId: problem.id,
+                      code,
+                      language,
+                      input: testInput,
+                    });
+                    const data = res.data || {};
+                    setTestStatus(typeof data.status === 'string' ? data.status : '');
+                    if (typeof data.output === 'string' && data.output.trim() !== '') {
+                      setTestOutput(data.output);
+                    } else {
+                      setTestOutput('');
+                    }
+                  } catch (err) {
+                    if (err.response && err.response.status === 429) {
+                      setTestError(t('problemTest.rateLimited'));
+                    } else {
+                      const msg = err.response?.data?.error || err.message || '';
+                      setTestError(msg ? `${t('problemTest.error')}: ${msg}` : t('problemTest.error'));
+                    }
+                  } finally {
+                    setTesting(false);
+                  }
+                }}
+                loading={testing}
+                disabled={testing || !code || ended}
+              >
+                {t('problemTest.runButton')}
+              </Button>
+            </div>
+            <textarea
+              value={testInput}
+              onChange={(e) => setTestInput(e.target.value)}
+              className="flex-1 w-full px-3 py-2 text-sm bg-white text-gray-900 border-0 outline-none resize-none"
+              placeholder=""
+            />
+          </Card>
+
+          <Card className="flex-1 flex flex-col border border-gray-200">
+            <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-700">
+                {t('problemTest.outputTitle')}
+              </span>
+              {testStatus && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                  {testStatus}
+                </span>
+              )}
+            </div>
+            <pre className="flex-1 px-3 py-2 text-xs md:text-sm bg-gray-50 text-gray-900 overflow-auto whitespace-pre-wrap break-words">
+              {testOutput || t('problemTest.noOutput')}
+            </pre>
+            {testError && (
+              <div className="px-4 py-2 text-xs text-red-600 border-top border-gray-200">
+                {testError}
+              </div>
+            )}
+          </Card>
         </div>
       </div>
     </div>

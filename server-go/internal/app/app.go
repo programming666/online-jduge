@@ -7,11 +7,15 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"onlinejudge-server-go/internal/judger"
@@ -29,10 +33,24 @@ type Config struct {
 }
 
 type App struct {
-	store      *store.Store
-	jwtSecret  []byte
-	docker     *judger.DockerRunner
-	httpRouter http.Handler
+	store          *store.Store
+	jwtSecret      []byte
+	docker         *judger.DockerRunner
+	httpRouter     http.Handler
+	codeRunMu      sync.Mutex
+	codeRunHistory map[int][]time.Time
+	geoIPService   *GeoIPService
+	sensitiveCache sync.Map
+	judgeQueue     chan judgeTask
+	judgeOnce      sync.Once
+	memoryThrottle uint32
+}
+
+type judgeTask struct {
+	submissionID int
+	problem      store.ProblemWithTestCases
+	code         string
+	language     string
 }
 
 type userClaims struct {
@@ -68,12 +86,80 @@ func New(cfg Config) (*App, error) {
 	}
 
 	a := &App{
-		store:     store.New(cfg.DB),
-		jwtSecret: []byte(secret),
-		docker:    runner,
+		store:          store.New(cfg.DB),
+		jwtSecret:      []byte(secret),
+		docker:         runner,
+		codeRunHistory: make(map[int][]time.Time),
+		geoIPService:   NewGeoIPService(),
+		judgeQueue:     make(chan judgeTask, 128),
 	}
+	a.startJudgeWorkers()
+	a.startMemoryMonitor()
 	a.httpRouter = a.buildRouter()
 	return a, nil
+}
+
+func (a *App) startJudgeWorkers() {
+	a.judgeOnce.Do(func() {
+		workerCount := 2
+		for i := 0; i < workerCount; i++ {
+			go func() {
+				for task := range a.judgeQueue {
+					a.judgeSubmission(task.submissionID, task.problem, task.code, task.language)
+				}
+			}()
+		}
+	})
+}
+
+func (a *App) isMemoryThrottled() bool {
+	return atomic.LoadUint32(&a.memoryThrottle) == 1
+}
+
+func (a *App) setMemoryThrottled(on bool) {
+	if on {
+		atomic.StoreUint32(&a.memoryThrottle, 1)
+	} else {
+		atomic.StoreUint32(&a.memoryThrottle, 0)
+	}
+}
+
+func (a *App) startMemoryMonitor() {
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			hostUsed, hostTotal := readHostMemory()
+			cgUsed, cgLimit := readCgroupMemory()
+			var hostRatio float64
+			var cgRatio float64
+			if hostTotal > 0 && hostUsed >= 0 {
+				hostRatio = float64(hostUsed) / float64(hostTotal)
+			}
+			if cgLimit > 0 && cgUsed >= 0 {
+				cgRatio = float64(cgUsed) / float64(cgLimit)
+			}
+
+			throttleOn := hostRatio > 0.8 || cgRatio > 0.8
+			throttleOff := hostRatio < 0.6 && cgRatio < 0.6
+
+			if throttleOn && !a.isMemoryThrottled() {
+				a.setMemoryThrottled(true)
+				log.Printf("[memory-monitor] enable throttle host=%.1f%% cgroup=%.1f%%", hostRatio*100, cgRatio*100)
+			} else if throttleOff && a.isMemoryThrottled() {
+				a.setMemoryThrottled(false)
+				log.Printf("[memory-monitor] disable throttle host=%.1f%% cgroup=%.1f%%", hostRatio*100, cgRatio*100)
+			}
+
+			go func() {
+				cmd := exec.Command("free", "-h")
+				out, err := cmd.CombinedOutput()
+				if err == nil {
+					log.Printf("[memory-monitor] free -h output:\n%s", string(out))
+				}
+			}()
+		}
+	}()
 }
 
 func (a *App) Router() http.Handler {
@@ -94,6 +180,7 @@ func (a *App) buildRouter() http.Handler {
 	})
 
 	r.Route("/api", func(r chi.Router) {
+		r.Use(a.logAccess)
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", a.handleRegister)
 			r.Post("/login", a.handleLogin)
@@ -125,6 +212,8 @@ func (a *App) buildRouter() http.Handler {
 			r.With(a.authenticateToken).Post("/", a.handleSubmissionCreate)
 		})
 
+		r.With(a.authenticateToken).Post("/run", a.handleRunCode)
+
 		r.Route("/settings", func(r chi.Router) {
 			r.Get("/registration", a.handleRegistrationGet)
 			r.With(a.authenticateToken, a.authorizeAdmin).Put("/registration", a.handleRegistrationPut)
@@ -134,6 +223,8 @@ func (a *App) buildRouter() http.Handler {
 			r.With(a.authenticateToken, a.authorizeAdmin).Put("/footer", a.handleFooterPut)
 			r.Get("/rate-limit", a.handleRateLimitGet)
 			r.With(a.authenticateToken, a.authorizeAdmin).Put("/rate-limit", a.handleRateLimitPut)
+			r.Get("/code-run-rate-limit", a.handleCodeRunRateLimitGet)
+			r.With(a.authenticateToken, a.authorizeAdmin).Put("/code-run-rate-limit", a.handleCodeRunRateLimitPut)
 			r.Get("/turnstile", a.handleTurnstileGet)
 			r.With(a.authenticateToken, a.authorizeAdmin).Put("/turnstile", a.handleTurnstilePut)
 			r.With(a.authenticateToken, a.authorizeAdmin).Post("/turnstile/verify", a.handleTurnstileVerify)
@@ -153,6 +244,25 @@ func (a *App) buildRouter() http.Handler {
 			r.Get("/", a.handleBannedIPList)
 			r.Post("/", a.handleBanIP)
 			r.Delete("/{ip}", a.handleUnbanIP)
+			r.Delete("/id/{id}", a.handleUnbanIPByID)
+		})
+
+		r.Route("/admin/access-history", func(r chi.Router) {
+			r.Use(a.authenticateToken, a.authorizeAdmin)
+			r.Get("/", a.handleAccessHistoryList)
+			r.Get("/user/{id}", a.handleUserAccessHistory)
+			r.Get("/user/{id}/ips", a.handleUserIPAssociations)
+		})
+
+		r.Route("/admin/security", func(r chi.Router) {
+			r.Use(a.authenticateToken, a.authorizeAdmin)
+			r.Get("/error-stats", a.handleErrorStats)
+			r.Get("/sensitive-report", a.handleSensitiveReport)
+			r.Get("/ip-marks", a.handleIPMarkList)
+			r.Put("/ip-marks/{ip}", a.handleIPMarkUpsert)
+			r.Delete("/ip-marks/{ip}", a.handleIPMarkDelete)
+			r.Get("/ip-marks/{ip}/associations", a.handleIPMarkAssociations)
+			r.Get("/system-status", a.handleSystemStatus)
 		})
 
 		r.With(a.authenticateToken, a.authorizeAdmin).Delete("/admin/submissions/{id}", a.handleAdminDeleteSubmission)
@@ -196,6 +306,99 @@ func (a *App) cors(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+type accessResponseWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *accessResponseWriter) WriteHeader(code int) {
+	w.status = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func (a *App) logAccess(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u, ok := a.currentUser(r)
+		if !ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+		aw := &accessResponseWriter{ResponseWriter: w, status: http.StatusOK}
+		start := time.Now()
+		next.ServeHTTP(aw, r)
+		_ = start
+		path := r.URL.RequestURI()
+		if len(path) > 1024 {
+			path = path[:1024]
+		}
+		isSensitive := a.isSensitivePath(path)
+		status := aw.status
+		accessType := r.Method
+		if status == http.StatusServiceUnavailable && aw.Header().Get("X-System-Status") == "memory_throttle" {
+			accessType = "MEMORY_THROTTLED"
+		}
+		go func(userID int, ip, ua, accessType, requestPath string, statusCode int, webrtcIP string, sensitive bool) {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			ipToUse := ip
+			geoInfo := a.geoIPService.LookupIP(ipToUse)
+			browser, osName := ParseUserAgent(ua)
+			strPtr := func(s string) *string {
+				if s == "" {
+					return nil
+				}
+				return &s
+			}
+			var statusPtr *int
+			if statusCode > 0 {
+				v := statusCode
+				statusPtr = &v
+			}
+			reqPath := requestPath
+			var reqPathPtr *string
+			if reqPath != "" {
+				reqPathPtr = &reqPath
+			}
+			params := store.CreateAccessHistoryParams{
+				UserID:      userID,
+				IP:          ipToUse,
+				UserAgent:   strPtr(ua),
+				AccessType:  accessType,
+				Country:     strPtr(geoInfo.Country),
+				Province:    strPtr(geoInfo.Province),
+				City:        strPtr(geoInfo.City),
+				ISP:         strPtr(geoInfo.ISP),
+				Browser:     strPtr(browser),
+				OS:          strPtr(osName),
+				WebRTCIP:    strPtr(webrtcIP),
+				StatusCode:  statusPtr,
+				RequestPath: reqPathPtr,
+				IsSensitive: sensitive,
+			}
+			_ = a.store.CreateAccessHistory(ctx, params)
+		}(u.ID, getClientIP(r), r.UserAgent(), accessType, path, status, r.Header.Get("X-WebRTC-IP"), isSensitive)
+	})
+}
+
+func (a *App) isSensitivePath(p string) bool {
+	if v, ok := a.sensitiveCache.Load(p); ok {
+		if b, ok := v.(bool); ok {
+			return b
+		}
+	}
+	l := strings.ToLower(p)
+	sensitive := false
+	if strings.HasPrefix(l, "/api/admin") ||
+		strings.HasPrefix(l, "/admin") ||
+		strings.HasPrefix(l, "/.git") ||
+		strings.HasPrefix(l, "/.env") ||
+		strings.Contains(l, "config") {
+		sensitive = true
+	}
+	a.sensitiveCache.Store(p, sensitive)
+	return sensitive
 }
 
 func (a *App) authenticateToken(next http.Handler) http.Handler {
@@ -407,6 +610,12 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "Login failed"})
 		return
 	}
+
+	// Record access history asynchronously
+	go func() {
+		a.recordAccessHistory(u.ID, clientIP, r.UserAgent(), "LOGIN", r.Header.Get("X-WebRTC-IP"))
+	}()
+
 	writeJSON(w, http.StatusOK, map[string]any{"token": signed, "role": u.Role, "username": u.Username})
 }
 
@@ -994,9 +1203,133 @@ func (a *App) handleSubmissionCreate(w http.ResponseWriter, r *http.Request) {
 
 	problemForJudge := p
 	subID := sub.ID
-	go a.judgeSubmission(subID, problemForJudge, code, language)
+	select {
+	case a.judgeQueue <- judgeTask{submissionID: subID, problem: problemForJudge, code: code, language: language}:
+	default:
+		go a.judgeSubmission(subID, problemForJudge, code, language)
+	}
 
 	writeJSON(w, http.StatusOK, sub)
+}
+
+func (a *App) handleRunCode(w http.ResponseWriter, r *http.Request) {
+	u, ok := a.currentUser(r)
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user, err := a.store.GetUserByID(r.Context(), u.ID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "Failed to check user status"})
+		return
+	}
+	if user.IsBanned {
+		writeJSON(w, http.StatusForbidden, map[string]any{"error": "Your account has been banned"})
+		return
+	}
+
+	clientIP := getClientIP(r)
+	isBanned, err := a.store.IsIPBanned(r.Context(), clientIP)
+	if err == nil && isBanned {
+		writeJSON(w, http.StatusForbidden, map[string]any{"error": "Your IP has been banned"})
+		return
+	}
+
+	if a.isMemoryThrottled() {
+		w.Header().Set("X-System-Status", "memory_throttle")
+		log.Printf("[memory-throttle] 内存限流拒绝 user=%d ip=%s path=%s", u.ID, clientIP, r.URL.Path)
+		writeJSON(w, http.StatusServiceUnavailable, map[string]any{
+			"error": "System is under memory pressure. Please try test run later.",
+		})
+		return
+	}
+
+	allowed, limit, used, err := a.allowCodeRun(r.Context(), u.ID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "Failed to check rate limit"})
+		return
+	}
+	if !allowed {
+		writeJSON(w, http.StatusTooManyRequests, map[string]any{
+			"error":  "Code run rate limit exceeded. Please wait before testing again.",
+			"limit":  limit,
+			"used":   used,
+			"window": "1 minute",
+		})
+		return
+	}
+
+	var body struct {
+		ProblemID int    `json:"problemId"`
+		Language  string `json:"language"`
+		Code      string `json:"code"`
+		Input     string `json:"input"`
+	}
+	if err := readJSON(r, &body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid JSON"})
+		return
+	}
+	if body.ProblemID <= 0 || strings.TrimSpace(body.Code) == "" || strings.TrimSpace(body.Language) == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid payload"})
+		return
+	}
+
+	p, err := a.store.GetProblemWithTestCases(r.Context(), body.ProblemID)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "Problem not found"})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	timeLimit := p.TimeLimit
+	if len(p.Config) > 0 {
+		var cfg map[string]map[string]any
+		if json.Unmarshal(p.Config, &cfg) == nil {
+			if langCfg, ok := cfg[body.Language]; ok {
+				if tl, ok := parseIntAny(langCfg["timeLimit"]); ok && tl > 0 {
+					timeLimit = tl
+				}
+			}
+		}
+	}
+
+	opts := judger.Options{
+		TimeLimitMs:    timeLimit,
+		MemoryLimitMB:  p.MemoryLimit,
+		CompileOptions: p.DefaultCompileOptions,
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	defer cancel()
+
+	testCases := []judger.TestCase{
+		{
+			Input:          body.Input,
+			ExpectedOutput: "",
+		},
+	}
+
+	judgeRes, _ := a.docker.Judge(ctx, body.Language, body.Code, testCases, opts)
+
+	if judgeRes.Status != "Judged" || len(judgeRes.Results) == 0 {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"status": judgeRes.Status,
+			"output": judgeRes.Output,
+		})
+		return
+	}
+
+	res := judgeRes.Results[0]
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":     res.Status,
+		"output":     res.Output,
+		"timeUsed":   res.TimeUsed,
+		"memoryUsed": res.MemoryUsed,
+	})
 }
 
 func (a *App) judgeSubmission(submissionID int, p store.ProblemWithTestCases, code string, language string) {
@@ -1351,10 +1684,16 @@ func (a *App) handleContestPublicList(w http.ResponseWriter, r *http.Request) {
 	var total int
 	var err error
 
+	u, okUser := a.tryUserFromAuthHeader(r)
+	userID := 0
+	if okUser {
+		userID = u.ID
+	}
+
 	if hasMin || hasMax {
-		items, total, err = a.store.ListPublishedContestsAll(r.Context(), filter, minParticipants, maxParticipants, page, pageSize)
+		items, total, err = a.store.ListPublishedContestsAll(r.Context(), filter, userID, minParticipants, maxParticipants, page, pageSize)
 	} else {
-		items, total, err = a.store.ListPublishedContestsPaged(r.Context(), filter, page, pageSize)
+		items, total, err = a.store.ListPublishedContestsPaged(r.Context(), filter, userID, page, pageSize)
 	}
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
@@ -1375,7 +1714,7 @@ func (a *App) handleContestPublicDetail(w http.ResponseWriter, r *http.Request) 
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid contest id"})
 		return
 	}
-	u, _ := a.tryUserFromAuthHeader(r)
+	u, okUser := a.tryUserFromAuthHeader(r)
 
 	contest, err := a.store.GetContestWithProblemsPublic(r.Context(), id)
 	if err != nil {
@@ -1387,7 +1726,22 @@ func (a *App) handleContestPublicDetail(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if contest.HasPassword {
+	now := time.Now()
+	if now.After(contest.EndTime) {
+		if !okUser {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+			return
+		}
+		if !joined {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+	} else if contest.HasPassword {
 		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
@@ -1413,7 +1767,7 @@ func (a *App) handleContestPublicProblem(w http.ResponseWriter, r *http.Request)
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid problem order"})
 		return
 	}
-	u, _ := a.tryUserFromAuthHeader(r)
+	u, okUser := a.tryUserFromAuthHeader(r)
 	contest, err := a.store.GetContestByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
@@ -1427,7 +1781,22 @@ func (a *App) handleContestPublicProblem(w http.ResponseWriter, r *http.Request)
 		writeJSON(w, http.StatusNotFound, map[string]any{"error": "Contest not published"})
 		return
 	}
-	if contest.PasswordHash != nil {
+	now := time.Now()
+	if now.After(contest.EndTime) {
+		if !okUser {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+			return
+		}
+		if !joined {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+	} else if contest.PasswordHash != nil {
 		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
@@ -1464,7 +1833,7 @@ func (a *App) handleContestPublicAttachmentsList(w http.ResponseWriter, r *http.
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid contest id"})
 		return
 	}
-	u, _ := a.tryUserFromAuthHeader(r)
+	u, okUser := a.tryUserFromAuthHeader(r)
 	contest, err := a.store.GetContestByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
@@ -1478,7 +1847,22 @@ func (a *App) handleContestPublicAttachmentsList(w http.ResponseWriter, r *http.
 		writeJSON(w, http.StatusNotFound, map[string]any{"error": "Contest not published"})
 		return
 	}
-	if contest.PasswordHash != nil {
+	now := time.Now()
+	if now.After(contest.EndTime) {
+		if !okUser {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+			return
+		}
+		if !joined {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+	} else if contest.PasswordHash != nil {
 		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
@@ -1522,7 +1906,7 @@ func (a *App) handleContestPublicAttachmentDownload(w http.ResponseWriter, r *ht
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid filename"})
 		return
 	}
-	u, _ := a.tryUserFromAuthHeader(r)
+	u, okUser := a.tryUserFromAuthHeader(r)
 	contest, err := a.store.GetContestByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
@@ -1536,7 +1920,22 @@ func (a *App) handleContestPublicAttachmentDownload(w http.ResponseWriter, r *ht
 		writeJSON(w, http.StatusNotFound, map[string]any{"error": "Contest not published"})
 		return
 	}
-	if contest.PasswordHash != nil {
+	now := time.Now()
+	if now.After(contest.EndTime) {
+		if !okUser {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+			return
+		}
+		if !joined {
+			writeJSON(w, http.StatusForbidden, map[string]any{"error": "Only participants can view finished contests"})
+			return
+		}
+	} else if contest.PasswordHash != nil {
 		joined, err := a.store.HasContestParticipant(r.Context(), id, u.ID)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
@@ -2086,6 +2485,35 @@ func max(a, b int) int {
 	return b
 }
 
+func (a *App) allowCodeRun(ctx context.Context, userID int) (bool, int, int, error) {
+	limit, err := a.store.GetCodeRunRateLimit(ctx)
+	if err != nil {
+		return false, 0, 0, err
+	}
+	now := time.Now()
+	windowStart := now.Add(-time.Minute)
+
+	a.codeRunMu.Lock()
+	defer a.codeRunMu.Unlock()
+
+	times := a.codeRunHistory[userID]
+	pruned := times[:0]
+	for _, ts := range times {
+		if ts.After(windowStart) {
+			pruned = append(pruned, ts)
+		}
+	}
+	times = pruned
+	used := len(times)
+	if used >= limit {
+		a.codeRunHistory[userID] = times
+		return false, limit, used, nil
+	}
+	times = append(times, now)
+	a.codeRunHistory[userID] = times
+	return true, limit, len(times), nil
+}
+
 // Footer handlers
 func (a *App) handleFooterGet(w http.ResponseWriter, r *http.Request) {
 	content, err := a.store.GetFooterContent(r.Context())
@@ -2135,6 +2563,35 @@ func (a *App) handleRateLimitPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	limit, err := a.store.UpsertSubmissionRateLimit(r.Context(), body.Limit)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"limit": limit})
+}
+
+func (a *App) handleCodeRunRateLimitGet(w http.ResponseWriter, r *http.Request) {
+	limit, err := a.store.GetCodeRunRateLimit(r.Context())
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"limit": limit})
+}
+
+func (a *App) handleCodeRunRateLimitPut(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Limit int `json:"limit"`
+	}
+	if err := readJSON(r, &body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid JSON"})
+		return
+	}
+	if body.Limit < 1 || body.Limit > 60 {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Rate limit must be between 1 and 60"})
+		return
+	}
+	limit, err := a.store.UpsertCodeRunRateLimit(r.Context(), body.Limit)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
 		return
@@ -2215,12 +2672,27 @@ func (a *App) handleUserBan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.store.BanUser(r.Context(), id, body.Reason); err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+	var bannedIPCount int
+	var banErr error
+
+	if body.BanIP {
+		// Smart ban: ban user and all associated IPs
+		bannedIPCount, banErr = a.store.BanUserWithAllIPs(r.Context(), id, body.Reason)
+	} else {
+		// Simple ban: only ban the user account
+		banErr = a.store.BanUser(r.Context(), id, body.Reason)
+	}
+
+	if banErr != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": banErr.Error()})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+	response := map[string]any{"success": true}
+	if body.BanIP && bannedIPCount > 0 {
+		response["bannedIPCount"] = bannedIPCount
+	}
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (a *App) handleUserUnban(w http.ResponseWriter, r *http.Request) {
@@ -2355,6 +2827,13 @@ func (a *App) handleBanIP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userIDs, err := a.store.GetUsersByIP(r.Context(), body.IP)
+	if err == nil {
+		for _, uid := range userIDs {
+			_, _ = a.store.BanUserWithAllIPs(r.Context(), uid, body.Reason)
+		}
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{"success": true})
 }
 
@@ -2375,6 +2854,424 @@ func (a *App) handleUnbanIP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+// handleUnbanIPByID removes a specific IP from the banned list by ID
+func (a *App) handleUnbanIPByID(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseIntParam(chi.URLParam(r, "id"))
+	if !ok {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid ID"})
+		return
+	}
+
+	if err := a.store.UnbanIPByID(r.Context(), id); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "Banned IP not found"})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+// Access History handlers
+
+// handleAccessHistoryList returns all access history records
+func (a *App) handleAccessHistoryList(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	limit := 100
+	if l, ok := parseIntParam(q.Get("limit")); ok && l > 0 && l <= 1000 {
+		limit = l
+	}
+
+	var userID *int
+	if uid, ok := parseIntParam(q.Get("userId")); ok && uid > 0 {
+		userID = &uid
+	}
+
+	records, err := a.store.ListAccessHistory(r.Context(), userID, limit)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, records)
+}
+
+// handleUserAccessHistory returns access history for a specific user
+func (a *App) handleUserAccessHistory(w http.ResponseWriter, r *http.Request) {
+	userID, ok := parseIntParam(chi.URLParam(r, "id"))
+	if !ok {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid user id"})
+		return
+	}
+
+	q := r.URL.Query()
+	limit := 100
+	if l, ok := parseIntParam(q.Get("limit")); ok && l > 0 && l <= 1000 {
+		limit = l
+	}
+
+	records, err := a.store.GetAccessHistoryForUser(r.Context(), userID, limit)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, records)
+}
+
+// handleUserIPAssociations returns all IP associations for a user
+func (a *App) handleUserIPAssociations(w http.ResponseWriter, r *http.Request) {
+	userID, ok := parseIntParam(chi.URLParam(r, "id"))
+	if !ok {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid user id"})
+		return
+	}
+
+	associations, err := a.store.GetUserIPAssociations(r.Context(), userID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, associations)
+}
+
+func (a *App) handleErrorStats(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	fromStr := strings.TrimSpace(q.Get("from"))
+	toStr := strings.TrimSpace(q.Get("to"))
+	if fromStr == "" || toStr == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "from and to are required"})
+		return
+	}
+	from, err1 := time.Parse(time.RFC3339, fromStr)
+	to, err2 := time.Parse(time.RFC3339, toStr)
+	if err1 != nil || err2 != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid from or to format, must be RFC3339"})
+		return
+	}
+	if to.Before(from) {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "to must be after from"})
+		return
+	}
+
+	var statusMin *int
+	var statusMax *int
+	if v := strings.TrimSpace(q.Get("statusMin")); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			statusMin = &n
+		}
+	}
+	if v := strings.TrimSpace(q.Get("statusMax")); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			statusMax = &n
+		}
+	}
+	var pathLike *string
+	if v := strings.TrimSpace(q.Get("pathLike")); v != "" {
+		pathLike = &v
+	}
+
+	stats, err := a.store.GetErrorStats(r.Context(), from, to, statusMin, statusMax, pathLike)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, stats)
+}
+
+func (a *App) handleSensitiveReport(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	fromStr := strings.TrimSpace(q.Get("from"))
+	toStr := strings.TrimSpace(q.Get("to"))
+	if fromStr == "" || toStr == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "from and to are required"})
+		return
+	}
+	from, err1 := time.Parse(time.RFC3339, fromStr)
+	to, err2 := time.Parse(time.RFC3339, toStr)
+	if err1 != nil || err2 != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid from or to format, must be RFC3339"})
+		return
+	}
+	if to.Before(from) {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "to must be after from"})
+		return
+	}
+	limit := 100
+	if v := strings.TrimSpace(q.Get("limit")); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 && n <= 1000 {
+			limit = n
+		}
+	}
+
+	rows, err := a.store.GetSensitiveAccessReport(r.Context(), from, to, limit)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, rows)
+}
+
+func (a *App) handleIPMarkList(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	var markType *string
+	if v := strings.TrimSpace(q.Get("markType")); v != "" {
+		markType = &v
+	}
+	limit := 50
+	if v := strings.TrimSpace(q.Get("limit")); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 && n <= 500 {
+			limit = n
+		}
+	}
+	offset := 0
+	if v := strings.TrimSpace(q.Get("offset")); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n >= 0 {
+			offset = n
+		}
+	}
+	items, err := a.store.ListIPMarks(r.Context(), markType, limit, offset)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, items)
+}
+
+func (a *App) handleIPMarkUpsert(w http.ResponseWriter, r *http.Request) {
+	ip := strings.TrimSpace(chi.URLParam(r, "ip"))
+	if ip == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "ip is required"})
+		return
+	}
+	var body struct {
+		MarkType string  `json:"markType"`
+		Reason   *string `json:"reason"`
+		ExpireAt *string `json:"expireAt"`
+	}
+	if err := readJSON(r, &body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid JSON"})
+		return
+	}
+	mt := strings.ToUpper(strings.TrimSpace(body.MarkType))
+	if mt != "MALICIOUS" && mt != "SUSPICIOUS" && mt != "WHITELIST" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid markType"})
+		return
+	}
+	var expireAt *time.Time
+	if body.ExpireAt != nil && strings.TrimSpace(*body.ExpireAt) != "" {
+		t, err := time.Parse(time.RFC3339, strings.TrimSpace(*body.ExpireAt))
+		if err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "Invalid expireAt format"})
+			return
+		}
+		expireAt = &t
+	}
+	u, _ := a.currentUser(r)
+	var operator *string
+	if u.Username != "" {
+		op := u.Username
+		operator = &op
+	}
+	if err := a.store.UpsertIPMark(r.Context(), ip, mt, body.Reason, expireAt, operator); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+func (a *App) handleIPMarkDelete(w http.ResponseWriter, r *http.Request) {
+	ip := strings.TrimSpace(chi.URLParam(r, "ip"))
+	if ip == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "ip is required"})
+		return
+	}
+	if err := a.store.DeleteIPMark(r.Context(), ip); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeJSON(w, http.StatusNotFound, map[string]any{"error": "mark not found"})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"success": true})
+}
+
+func (a *App) handleIPMarkAssociations(w http.ResponseWriter, r *http.Request) {
+	ip := strings.TrimSpace(chi.URLParam(r, "ip"))
+	if ip == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "ip is required"})
+		return
+	}
+
+	var mark any
+	m, err := a.store.GetIPMark(r.Context(), ip)
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+			return
+		}
+	} else {
+		mark = m
+	}
+
+	userIDs, err := a.store.GetUsersByIP(r.Context(), ip)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	assoc := []store.UserIPAssociation{}
+	for _, uid := range userIDs {
+		rows, err := a.store.GetUserIPAssociations(r.Context(), uid)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+			return
+		}
+		assoc = append(assoc, rows...)
+	}
+
+	history, err := a.store.ListAccessHistoryByIP(r.Context(), ip, 200)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"ip":           ip,
+		"mark":         mark,
+		"userIDs":      userIDs,
+		"associations": assoc,
+		"recentAccess": history,
+	})
+}
+
+func (a *App) handleSystemStatus(w http.ResponseWriter, r *http.Request) {
+	hostUsed, hostTotal := readHostMemory()
+	cgUsed, cgLimit := readCgroupMemory()
+	hostRatio := 0.0
+	cgRatio := 0.0
+	if hostTotal > 0 && hostUsed > 0 {
+		hostRatio = float64(hostUsed) / float64(hostTotal)
+	}
+	if cgLimit > 0 && cgUsed > 0 {
+		cgRatio = float64(cgUsed) / float64(cgLimit)
+	}
+	containerID := strings.TrimSpace(os.Getenv("HOSTNAME"))
+	if containerID == "" {
+		containerID = "unknown"
+	}
+	resp := map[string]any{
+		"hostUsedBytes":    hostUsed,
+		"hostTotalBytes":   hostTotal,
+		"hostRatio":        hostRatio,
+		"cgroupUsedBytes":  cgUsed,
+		"cgroupLimitBytes": cgLimit,
+		"cgroupRatio":      cgRatio,
+		"memoryThrottle":   a.isMemoryThrottled(),
+		"containerId":      containerID,
+		"containerName":    containerID,
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+// recordAccessHistory records a user's access with IP and metadata
+func (a *App) recordAccessHistory(userID int, clientIP, userAgent, action, webrtcIP string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	ipToUse := clientIP
+	if webrtcIP != "" {
+		ipToUse = webrtcIP
+	}
+
+	geoInfo := a.geoIPService.LookupIP(ipToUse)
+
+	browser, osName := ParseUserAgent(userAgent)
+
+	strPtr := func(s string) *string {
+		if s == "" {
+			return nil
+		}
+		return &s
+	}
+
+	params := store.CreateAccessHistoryParams{
+		UserID:      userID,
+		IP:          ipToUse,
+		UserAgent:   strPtr(userAgent),
+		AccessType:  action,
+		Country:     strPtr(geoInfo.Country),
+		Province:    strPtr(geoInfo.Province),
+		City:        strPtr(geoInfo.City),
+		ISP:         strPtr(geoInfo.ISP),
+		Browser:     strPtr(browser),
+		OS:          strPtr(osName),
+		WebRTCIP:    strPtr(webrtcIP),
+		StatusCode:  nil,
+		RequestPath: nil,
+		IsSensitive: false,
+	}
+
+	if err := a.store.CreateAccessHistory(ctx, params); err != nil {
+		// Log error but don't fail the request
+		// In production, you might want to use a proper logger
+		_ = err
+	}
+}
+
+// parseUserAgent extracts browser and OS information from User-Agent string
+func parseUserAgent(ua string) (browser, os string) {
+	ua = strings.ToLower(ua)
+
+	// Detect browser
+	switch {
+	case strings.Contains(ua, "edg/"):
+		browser = "Edge"
+	case strings.Contains(ua, "chrome/") && !strings.Contains(ua, "chromium/"):
+		browser = "Chrome"
+	case strings.Contains(ua, "firefox/"):
+		browser = "Firefox"
+	case strings.Contains(ua, "safari/") && !strings.Contains(ua, "chrome/"):
+		browser = "Safari"
+	case strings.Contains(ua, "opr/") || strings.Contains(ua, "opera/"):
+		browser = "Opera"
+	case strings.Contains(ua, "msie") || strings.Contains(ua, "trident/"):
+		browser = "Internet Explorer"
+	default:
+		browser = "Unknown"
+	}
+
+	// Detect OS
+	switch {
+	case strings.Contains(ua, "windows nt 10"):
+		os = "Windows 10/11"
+	case strings.Contains(ua, "windows nt 6.3"):
+		os = "Windows 8.1"
+	case strings.Contains(ua, "windows nt 6.2"):
+		os = "Windows 8"
+	case strings.Contains(ua, "windows nt 6.1"):
+		os = "Windows 7"
+	case strings.Contains(ua, "windows"):
+		os = "Windows"
+	case strings.Contains(ua, "mac os x"):
+		os = "macOS"
+	case strings.Contains(ua, "android"):
+		os = "Android"
+	case strings.Contains(ua, "iphone") || strings.Contains(ua, "ipad"):
+		os = "iOS"
+	case strings.Contains(ua, "linux"):
+		os = "Linux"
+	default:
+		os = "Unknown"
+	}
+
+	return browser, os
 }
 
 // getClientIP extracts the client IP from the request

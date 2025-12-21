@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 
 const API_URL = '/api';
 
@@ -78,49 +82,52 @@ function AdminProblemList({ embedded = false }) {
   return (
     <div>
       {!embedded && (
-        <h2 className="text-3xl font-bold mb-6 text-primary border-b-4 border-secondary inline-block pb-1">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-3">
+          <span className="w-1.5 h-8 bg-primary rounded-full"></span>
           {t('admin.menu.problems')}
         </h2>
       )}
 
       <div className="mb-6 flex flex-col md:flex-row gap-4">
         <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('problem.list.searchPlaceholder')}
-            className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-          />
-          <button
-            type="submit"
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
-          >
+          <div className="flex-1">
+            <Input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('problem.list.searchPlaceholder')}
+              fullWidth
+            />
+          </div>
+          <Button type="submit">
             {t('common.search')}
-          </button>
+          </Button>
         </form>
 
-        <select
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-          className="border border-gray-300 dark:border-gray-600 p-2 rounded focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-        >
-          <option value="">{t('problem.list.allDifficulties')}</option>
-          <option value="LEVEL1">{t('problem.difficulty.LEVEL1')}</option>
-          <option value="LEVEL2">{t('problem.difficulty.LEVEL2')}</option>
-          <option value="LEVEL3">{t('problem.difficulty.LEVEL3')}</option>
-          <option value="LEVEL4">{t('problem.difficulty.LEVEL4')}</option>
-          <option value="LEVEL5">{t('problem.difficulty.LEVEL5')}</option>
-          <option value="LEVEL6">{t('problem.difficulty.LEVEL6')}</option>
-          <option value="LEVEL7">{t('problem.difficulty.LEVEL7')}</option>
-        </select>
+        <div className="w-full md:w-48">
+          <Select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            fullWidth
+            options={[
+              { value: '', label: t('problem.list.allDifficulties') },
+              { value: 'LEVEL1', label: t('problem.difficulty.LEVEL1') },
+              { value: 'LEVEL2', label: t('problem.difficulty.LEVEL2') },
+              { value: 'LEVEL3', label: t('problem.difficulty.LEVEL3') },
+              { value: 'LEVEL4', label: t('problem.difficulty.LEVEL4') },
+              { value: 'LEVEL5', label: t('problem.difficulty.LEVEL5') },
+              { value: 'LEVEL6', label: t('problem.difficulty.LEVEL6') },
+              { value: 'LEVEL7', label: t('problem.difficulty.LEVEL7') },
+            ]}
+          />
+        </div>
       </div>
 
       {error && (
         <div className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+      <Card className="overflow-hidden border border-gray-200 dark:border-gray-700">
         {loading ? (
           <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
         ) : (
@@ -172,14 +179,14 @@ function AdminProblemList({ embedded = false }) {
                     </span>
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-right space-x-2">
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => handleToggleVisibility(problem.id, problem.visible)}
                       disabled={togglingId === problem.id}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
                     >
                       {problem.visible ? '设为隐藏' : '设为公开'}
-                    </button>
+                    </Button>
                     <Link
                       to={`/admin/edit/${problem.id}`}
                       className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
@@ -199,7 +206,7 @@ function AdminProblemList({ embedded = false }) {
             </tbody>
           </table>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

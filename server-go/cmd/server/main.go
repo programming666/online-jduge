@@ -1,15 +1,15 @@
 package main
 
 import (
-    "bufio"
-    "context"
-    "database/sql"
-    "log"
-    "net/http"
-    "net/url"
-    "os"
-    "strings"
-    "time"
+	"bufio"
+	"context"
+	"database/sql"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"time"
 
 	"onlinejudge-server-go/internal/app"
 
@@ -17,14 +17,14 @@ import (
 )
 
 func main() {
-    loadEnv(".env")
-    port := os.Getenv("API_PORT")
-    if strings.TrimSpace(port) == "" {
-        port = os.Getenv("PORT")
-    }
-    if strings.TrimSpace(port) == "" {
-        port = "3000"
-    }
+	loadEnv(".env")
+	port := os.Getenv("API_PORT")
+	if strings.TrimSpace(port) == "" {
+		port = os.Getenv("PORT")
+	}
+	if strings.TrimSpace(port) == "" {
+		port = "3000"
+	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if strings.TrimSpace(jwtSecret) == "" {
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:              ":" + port,
+		Addr:              "0.0.0.0:" + port,
 		Handler:           a.Router(),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
@@ -74,39 +74,39 @@ func main() {
 }
 
 func normalizeDatabaseURL(raw string) string {
-    u, err := url.Parse(raw)
-    if err != nil {
-        return raw
-    }
-    q := u.Query()
-    q.Del("schema")
-    u.RawQuery = q.Encode()
-    return u.String()
+	u, err := url.Parse(raw)
+	if err != nil {
+		return raw
+	}
+	q := u.Query()
+	q.Del("schema")
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func loadEnv(path string) {
-    f, err := os.Open(path)
-    if err != nil {
-        return
-    }
-    defer f.Close()
-    sc := bufio.NewScanner(f)
-    for sc.Scan() {
-        line := strings.TrimSpace(sc.Text())
-        if line == "" || strings.HasPrefix(line, "#") {
-            continue
-        }
-        i := strings.Index(line, "=")
-        if i <= 0 {
-            continue
-        }
-        key := strings.TrimSpace(line[:i])
-        val := strings.TrimSpace(line[i+1:])
-        if len(val) >= 2 {
-            if (val[0] == '"' && val[len(val)-1] == '"') || (val[0] == '\'' && val[len(val)-1] == '\'') {
-                val = val[1 : len(val)-1]
-            }
-        }
-        _ = os.Setenv(key, val)
-    }
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		i := strings.Index(line, "=")
+		if i <= 0 {
+			continue
+		}
+		key := strings.TrimSpace(line[:i])
+		val := strings.TrimSpace(line[i+1:])
+		if len(val) >= 2 {
+			if (val[0] == '"' && val[len(val)-1] == '"') || (val[0] == '\'' && val[len(val)-1] == '\'') {
+				val = val[1 : len(val)-1]
+			}
+		}
+		_ = os.Setenv(key, val)
+	}
 }

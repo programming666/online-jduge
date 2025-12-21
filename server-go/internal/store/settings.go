@@ -130,6 +130,40 @@ func (s *Store) UpsertSubmissionRateLimit(ctx context.Context, limit int) (int, 
 	return result, nil
 }
 
+// Code run rate limit settings (runs per minute)
+func (s *Store) GetCodeRunRateLimit(ctx context.Context) (int, error) {
+	var value sql.NullString
+	err := s.db.QueryRowContext(ctx, `SELECT "value" FROM "Setting" WHERE "key"='code_run_rate_limit'`).Scan(&value)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 6, nil
+		}
+		return 6, err
+	}
+	if !value.Valid {
+		return 6, nil
+	}
+	limit, err := strconv.Atoi(value.String)
+	if err != nil {
+		return 6, nil
+	}
+	return limit, nil
+}
+
+func (s *Store) UpsertCodeRunRateLimit(ctx context.Context, limit int) (int, error) {
+	var stored string
+	err := s.db.QueryRowContext(ctx, `
+		INSERT INTO "Setting" ("key","value") VALUES ('code_run_rate_limit',$1)
+		ON CONFLICT ("key") DO UPDATE SET "value"=EXCLUDED."value"
+		RETURNING "value"
+		`, strconv.Itoa(limit)).Scan(&stored)
+	if err != nil {
+		return 0, err
+	}
+	result, _ := strconv.Atoi(stored)
+	return result, nil
+}
+
 // Turnstile settings
 func (s *Store) GetTurnstileEnabled(ctx context.Context) (bool, error) {
 	var value sql.NullString

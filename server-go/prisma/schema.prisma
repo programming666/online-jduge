@@ -56,6 +56,8 @@ model User {
   participants ContestParticipant[]
   passwordAttempts ContestPasswordAttempt[]
   bannedIPs BannedIP[]
+  accessHistory AccessHistory[]
+  ipAssociations UserIPAssociation[]
 }
 
 enum Role {
@@ -170,4 +172,98 @@ model BannedIP {
   expiresAt DateTime?
 
   user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+}
+
+// 用户访问历史记录
+model AccessHistory {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  ip          String
+  country     String?
+  province    String?
+  city        String?
+  isp         String?
+  browser     String?
+  os          String?
+  device      String?
+  userAgent   String?
+  accessType  String
+  webrtcIP    String?
+  statusCode  Int?
+  requestPath String?
+  isSensitive Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ip])
+  @@index([createdAt])
+  @@index([statusCode])
+  @@index([isSensitive])
+}
+
+model UserIPAssociation {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  ip          String
+  firstSeen   DateTime @default(now())
+  lastSeen    DateTime @default(now())
+  accessCount Int      @default(1)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ip])
+  @@index([userId])
+  @@index([ip])
+}
+
+enum IPMarkType {
+  MALICIOUS
+  SUSPICIOUS
+  WHITELIST
+}
+
+model IPMark {
+  ipAddress String    @id
+  markType  IPMarkType
+  reason    String?
+  createdAt DateTime  @default(now())
+  expireAt  DateTime?
+  operator  String?
+}
+
+model AccessHistoryArchive {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  ip          String
+  country     String?
+  province    String?
+  city        String?
+  isp         String?
+  browser     String?
+  os          String?
+  device      String?
+  userAgent   String?
+  accessType  String
+  webrtcIP    String?
+  statusCode  Int?
+  requestPath String?
+  isSensitive Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  operatorId Int?
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([operatorId])
+  @@index([createdAt])
 }

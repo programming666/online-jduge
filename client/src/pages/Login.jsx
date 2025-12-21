@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import TurnstileWidget from '../components/TurnstileWidget';
+import { getPublicIP } from '../utils/ipDetection';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -12,6 +13,8 @@ function Login() {
   const [turnstileEnabled, setTurnstileEnabled] = useState(false);
   const [siteKey, setSiteKey] = useState('');
   const [cfToken, setCfToken] = useState('');
+  const [webrtcIP, setWebrtcIP] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -29,6 +32,17 @@ function Login() {
       } catch (_) {}
     };
     load();
+
+    // Start WebRTC IP detection in background
+    const detectIP = async () => {
+      try {
+        const ip = await getPublicIP();
+        if (ip) {
+          setWebrtcIP(ip);
+        }
+      } catch (_) {}
+    };
+    detectIP();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -37,12 +51,25 @@ function Login() {
       setError('请先完成人机验证');
       return;
     }
+    setIsSubmitting(true);
+    setError('');
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, { username, password, cfToken: cfToken });
+      // Include WebRTC IP in custom header for more accurate IP detection
+      const headers = {};
+      if (webrtcIP) {
+        headers['X-WebRTC-IP'] = webrtcIP;
+      }
+      const response = await axios.post(
+        `${API_URL}/auth/login`,
+        { username, password, cfToken: cfToken },
+        { headers }
+      );
       login(response.data);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || t('auth.login.loginFailed'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -91,9 +118,10 @@ function Login() {
           <div>
             <button
               type="submit"
-              className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              disabled={isSubmitting}
+              className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t('auth.login.signIn')}
+              {isSubmitting ? t('auth.login.signingIn') || 'Signing in...' : t('auth.login.signIn')}
             </button>
           </div>
         </form>

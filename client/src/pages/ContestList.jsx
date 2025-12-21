@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 
 const API_URL = '/api';
 const CACHE_KEY = 'contestListCache';
@@ -234,117 +238,108 @@ function ContestList() {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-4 text-primary border-b-4 border-secondary inline-block pb-1">
-        {t('contest.list.title')}
-      </h2>
-
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              {t('contest.list.statusFilter')}
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-              <option value="">{t('contest.list.status.all')}</option>
-              <option value="upcoming">{t('contest.status.upcoming')}</option>
-              <option value="ongoing">{t('contest.status.ongoing')}</option>
-              <option value="finished">{t('contest.status.finished')}</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              {t('contest.list.timeFrom')}
-            </label>
-            <input
-              type="datetime-local"
-              value={startFrom}
-              onChange={(e) => setStartFrom(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              {t('contest.list.timeTo')}
-            </label>
-            <input
-              type="datetime-local"
-              value={startTo}
-              onChange={(e) => setStartTo(e.target.value)}
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              {t('contest.list.minParticipants')}
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={minParticipants}
-              onChange={(e) => setMinParticipants(e.target.value)}
-              className="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              {t('contest.list.maxParticipants')}
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={maxParticipants}
-              onChange={(e) => setMaxParticipants(e.target.value)}
-              className="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <h2 className="text-3xl font-bold text-primary dark:text-blue-400">
+          {t('contest.list.title')}
+        </h2>
+        <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
           <button
-            type="button"
-            onClick={handleApplyFilters}
-            className="px-3 py-1 text-sm rounded bg-primary text-white hover:bg-blue-600"
+            onClick={() => setViewMode('card')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'card'
+                ? 'bg-white dark:bg-gray-600 text-primary dark:text-blue-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
           >
-            {t('common.filter')}
+            {t('contest.list.view.card')}
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-gray-600 text-primary dark:text-blue-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            {t('contest.list.view.list')}
           </button>
         </div>
+      </div>
 
-        <div className="flex flex-wrap gap-3 items-center justify-between">
+      <div className="bg-surface dark:bg-surface-dark rounded-xl shadow-card p-4 mb-6 border border-gray-100 dark:border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <Select
+            label={t('contest.list.statusFilter')}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            fullWidth
+            options={[
+              { value: '', label: t('contest.list.status.all') },
+              { value: 'upcoming', label: t('contest.status.upcoming') },
+              { value: 'ongoing', label: t('contest.status.ongoing') },
+              { value: 'finished', label: t('contest.status.finished') },
+            ]}
+          />
+
+          <Input
+            type="datetime-local"
+            label={t('contest.list.timeFrom')}
+            value={startFrom}
+            onChange={(e) => setStartFrom(e.target.value)}
+            fullWidth
+          />
+
+          <Input
+            type="datetime-local"
+            label={t('contest.list.timeTo')}
+            value={startTo}
+            onChange={(e) => setStartTo(e.target.value)}
+            fullWidth
+          />
+
+          <Input
+            type="number"
+            min="0"
+            label={t('contest.list.minParticipants')}
+            value={minParticipants}
+            onChange={(e) => setMinParticipants(e.target.value)}
+            fullWidth
+          />
+
+          <Input
+            type="number"
+            min="0"
+            label={t('contest.list.maxParticipants')}
+            value={maxParticipants}
+            onChange={(e) => setMaxParticipants(e.target.value)}
+            fullWidth
+          />
+
+          <div className="flex items-end">
+            <Button
+              onClick={handleApplyFilters}
+              variant="primary"
+              className="w-full md:w-auto"
+            >
+              {t('common.filter')}
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-3 items-center justify-end">
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 dark:text-gray-400">{t('contest.list.pageSize')}</span>
-            <select
+            <Select
               value={pageSize}
               onChange={handlePageSizeChange}
-              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
-
-          <div className="inline-flex rounded border border-gray-300 dark:border-gray-600 overflow-hidden text-xs">
-            <button
-              type="button"
-              onClick={() => setViewMode('card')}
-              className={`px-3 py-1 ${viewMode === 'card' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}
-            >
-              {t('contest.list.view.card')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-1 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}
-            >
-              {t('contest.list.view.list')}
-            </button>
+              options={[
+                { value: 5, label: '5' },
+                { value: 10, label: '10' },
+                { value: 20, label: '20' },
+                { value: 50, label: '50' },
+              ]}
+              className="min-w-[80px]"
+            />
           </div>
         </div>
       </div>
@@ -355,7 +350,7 @@ function ContestList() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+      <Card className="shadow-lg transition-colors duration-200">
         {loading ? (
           <div className="p-6 text-center text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
         ) : contests.length === 0 ? (
@@ -366,6 +361,9 @@ function ContestList() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {contests.map((contest) => {
                   const status = getStatus(contest.startTime, contest.endTime);
+                  const joined = !!contest.joined;
+                  const isFinished = status === 'finished';
+
                   let statusText = '';
                   let statusClass = '';
 
@@ -379,6 +377,9 @@ function ContestList() {
                     statusText = t('contest.status.finished');
                     statusClass = 'bg-gray-200 text-gray-700';
                   }
+
+                  const disabled = isFinished && !joined;
+                  const showView = isFinished && joined;
 
                   return (
                     <div key={contest.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex flex-col justify-between dark:bg-gray-800 transition-colors duration-200">
@@ -406,13 +407,32 @@ function ContestList() {
                       </div>
                       <div className="mt-4 flex items-center justify-between">
                         <span className="text-xs text-gray-500 dark:text-gray-500 uppercase">{contest.rule}</span>
-                        <button
-                          type="button"
-                          onClick={() => openPasswordModal(contest)}
-                          className="px-4 py-2 rounded bg-primary text-white text-sm font-semibold hover:bg-blue-600"
-                        >
-                          {t('contest.list.join')}
-                        </button>
+                        {showView ? (
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/contest/${contest.id}`)}
+                            className="px-4 py-2 rounded bg-green-600 text-white text-sm font-semibold hover:bg-green-700"
+                          >
+                            {t('contest.list.view')}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!disabled) {
+                                openPasswordModal(contest);
+                              }
+                            }}
+                            disabled={disabled}
+                            className={`px-4 py-2 rounded text-sm font-semibold ${
+                              disabled
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-primary text-white hover:bg-blue-600'
+                            }`}
+                          >
+                            {t('contest.list.join')}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -426,7 +446,7 @@ function ContestList() {
                       <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.name')}</th>
                       <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.startTime')}</th>
                       <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.endTime')}</th>
-                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.status')}</th>
+                      <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.statusLabel')}</th>
                       <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-gray-700 dark:text-gray-200">{t('contest.list.participants')}</th>
                       <th className="px-4 py-2 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-right text-gray-700 dark:text-gray-200">{t('contest.list.actions')}</th>
                     </tr>
@@ -434,6 +454,9 @@ function ContestList() {
                   <tbody>
                     {contests.map((contest) => {
                       const status = getStatus(contest.startTime, contest.endTime);
+                      const joined = !!contest.joined;
+                      const isFinished = status === 'finished';
+
                       let statusText = '';
                       let statusClass = '';
 
@@ -447,6 +470,9 @@ function ContestList() {
                         statusText = t('contest.status.finished');
                         statusClass = 'bg-gray-200 text-gray-700';
                       }
+
+                      const disabled = isFinished && !joined;
+                      const showView = isFinished && joined;
 
                       return (
                         <tr key={contest.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -465,13 +491,29 @@ function ContestList() {
                             {contest.participantCount}
                           </td>
                           <td className="px-4 py-2 border-b dark:border-gray-700 text-right">
-                            <button
-                              type="button"
-                              onClick={() => openPasswordModal(contest)}
-                              className="px-3 py-1 rounded bg-primary text-white text-xs font-semibold hover:bg-blue-600"
-                            >
-                              {t('contest.list.join')}
-                            </button>
+                            {showView ? (
+                              <Button
+                                onClick={() => navigate(`/contest/${contest.id}`)}
+                                variant="primary"
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {t('contest.list.view')}
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => {
+                                  if (!disabled) {
+                                    openPasswordModal(contest);
+                                  }
+                                }}
+                                disabled={disabled}
+                                variant="primary"
+                                size="sm"
+                              >
+                                {t('contest.list.join')}
+                              </Button>
+                            )}
                           </td>
                         </tr>
                       );
@@ -492,50 +534,52 @@ function ContestList() {
               })}
             </div>
             <div className="flex space-x-2">
-              <button
-                type="button"
+              <Button
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
-                className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:text-gray-300 disabled:opacity-50 dark:disabled:opacity-30"
+                variant="outline"
+                size="sm"
               >
                 {t('contest.list.prev')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= totalPages}
-                className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:text-gray-300 disabled:opacity-50 dark:disabled:opacity-30"
+                variant="outline"
+                size="sm"
               >
                 {t('contest.list.next')}
-              </button>
+              </Button>
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {selectedContest && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700">
+          <Card className="max-w-sm w-full p-6 shadow-xl">
             <h3 className="text-lg font-semibold mb-4 text-primary">
               {t('contest.password.title', { name: selectedContest.name })}
             </h3>
             {selectedContest.hasPassword && (
               <div className="mb-4">
                 <div className="relative">
-                  <input
+                  <Input
                     type={passwordVisible ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     placeholder={t('contest.password.placeholder')}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded p-2 pr-16 focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    fullWidth
+                    suffix={
+                      <button
+                        type="button"
+                        onClick={() => setPasswordVisible((prev) => !prev)}
+                        className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 focus:outline-none"
+                      >
+                        {passwordVisible ? t('contest.password.hide') : t('contest.password.show')}
+                      </button>
+                    }
                   />
-                  <button
-                    type="button"
-                    onClick={() => setPasswordVisible((prev) => !prev)}
-                    className="absolute inset-y-0 right-2 px-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  >
-                    {passwordVisible ? t('contest.password.hide') : t('contest.password.show')}
-                  </button>
                 </div>
                 {passwordStrength && (
                   <div className="mt-1 text-xs">
@@ -559,23 +603,23 @@ function ContestList() {
               <div className="mb-2 text-sm text-red-600 dark:text-red-400">{passwordError}</div>
             )}
             <div className="flex justify-end space-x-2 mt-4">
-              <button
-                type="button"
+              <Button
                 onClick={closePasswordModal}
-                className="px-4 py-2 text-sm rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                variant="outline"
+                size="sm"
               >
                 {t('common.cancel')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={handleJoin}
-                disabled={joining}
-                className="px-4 py-2 text-sm rounded bg-primary text-white hover:bg-blue-600 disabled:opacity-50"
+                loading={joining}
+                variant="primary"
+                size="sm"
               >
-                {joining ? t('common.loading') : t('contest.password.submit')}
-              </button>
+                {t('contest.password.submit')}
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>

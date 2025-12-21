@@ -147,6 +147,13 @@
       "updateSuccess": "Rate limit updated successfully",
       "updateFailed": "Failed to update rate limit"
     },
+    "codeRunRateLimit": {
+      "title": "Code Test Rate Limit",
+      "description": "Set the maximum number of code test runs per user per minute.",
+      "label": "Maximum test runs per minute",
+      "updateSuccess": "Code test rate limit updated successfully",
+      "updateFailed": "Failed to update code test rate limit"
+    },
     "userManagement": {
       "title": "User Management",
       "description": "Manage system users, including banning and deleting users.",
@@ -221,6 +228,67 @@
         "load": "Failed to load banned IPs"
       },
       "noIPs": "No banned IPs"
+    },
+    "userAccess": {
+      "title": "User Access History & IP Relations",
+      "userSearchLabel": "User search",
+      "userSearchPlaceholder": "Enter user ID or username...",
+      "userSearchHint": "Digits only are treated as exact user ID, others as fuzzy username search.",
+      "dateRangeLabel": "Date range",
+      "dateRangeHint": "Defaults to last 30 days, maximum range is 1 year.",
+      "quickActions": "Query actions",
+      "queryButton": "Query",
+      "resetButton": "Reset",
+      "securityNote": "Admin only. All operations are logged.",
+      "tableTitle": "Access records",
+      "currentUserLabel": "Current user: #{{id}} {{username}}",
+      "ipFilterPlaceholder": "Filter by IP",
+      "typeFilterPlaceholder": "Filter by access type",
+      "columns": {
+        "createdAt": "Access time",
+        "ip": "IP address",
+        "location": "Location",
+        "device": "Device",
+        "accessType": "Operation"
+      },
+      "empty": "No access records.",
+      "exportCSV": "Export CSV",
+      "exportExcel": "Export Excel",
+      "trendTitle": "Daily access trend",
+      "mapTitle": "Geo distribution heatmap",
+      "selectedCountryLabel": "Selected region: {{country}}",
+      "suspiciousTitle": "Suspicious IP detection",
+      "suspiciousDesc": "{{total}} accesses across {{countryCount}} countries/regions",
+      "banButton": "Ban IP",
+      "confirmBanIp": "Are you sure you want to ban IP {{ip}}? This affects all requests from this IP.",
+      "confirmBanWithoutTurnstile": "Turnstile is disabled. Still ban IP {{ip}} directly?",
+      "autoBanReason": "Automatically banned due to abnormal access pattern",
+      "banSuccess": "IP ban submitted",
+      "banFailed": "Failed to ban IP",
+      "noSuspicious": "No obvious suspicious IPs in current range.",
+      "tagButton": "Tag",
+      "tagListTitle": "Tagged IP monitoring list",
+      "tagListEmpty": "No tagged IPs.",
+      "tagEdit": "Edit",
+      "tagRemove": "Remove",
+      "tagDialogTitle": "Tag IP {{ip}}",
+      "tagLabels": "Labels",
+      "tagLabelsPlaceholder": "Comma-separated labels, e.g. crawler, suspicious-attack",
+      "tagReason": "Reason",
+      "tagReasonPlaceholder": "Please describe why this IP is tagged. Required.",
+      "tagSave": "Save tag",
+      "error": {
+        "userRequired": "Please enter a user ID or username.",
+        "userNotFound": "No matching user found. Please check input.",
+        "dateRequired": "Please select start and end dates.",
+        "dateInvalid": "Invalid date format.",
+        "dateOrder": "Start date cannot be later than end date.",
+        "dateTooLong": "Date range cannot exceed one year.",
+        "fetchFailed": "Failed to load access history.",
+        "turnstileRequired": "Please complete the human verification before banning.",
+        "turnstileFailed": "Human verification failed. Please retry.",
+        "tagReasonRequired": "Please provide a reason for tagging."
+      }
     }
   },
   "contest": {
@@ -247,6 +315,7 @@
       "name": "Name",
       "actions": "Actions",
       "join": "Join",
+      "view": "View",
       "pagination": "Page {{page}} of {{totalPages}}",
       "prev": "Previous",
       "next": "Next"
@@ -358,6 +427,14 @@
     "cpp": "C++ (G++ 13+)",
     "python": "Python 3"
   },
+  "problemTest": {
+    "inputTitle": "Custom Input",
+    "outputTitle": "Execution Result",
+    "runButton": "Run Code",
+    "noOutput": "No output yet.",
+    "rateLimited": "You are running tests too frequently. Please try again later.",
+    "error": "Failed to run code"
+  },
   "error": {
     "404": {
       "title": "404 - Page Not Found",
@@ -376,6 +453,24 @@
     "sidebar": {
       "collapse": "Collapse Sidebar",
       "expand": "Expand Sidebar"
+    },
+    "systemStatus": {
+      "title": "System Memory Status",
+      "containerLabel": "Container ID: {{id}}",
+      "cgroupMemory": "Container memory usage",
+      "hostMemory": "Host memory usage",
+      "notAvailable": "No data",
+      "refreshInterval": "Refresh interval",
+      "refreshNow": "Refresh now",
+      "trendTitle": "Last 1 hour memory usage trend",
+      "trendSubtitle": "Shows container memory usage ratio",
+      "status": {
+        "normal": "Normal",
+        "throttled": "Memory throttled"
+      },
+      "error": {
+        "load": "Failed to load system status"
+      }
     }
   }
   ,

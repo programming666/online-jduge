@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import { useTranslation } from 'react-i18next';
 
@@ -36,9 +37,18 @@ function UserCode() {
   return (
     <PageTransition>
       <div>
-        <h2 className="text-2xl font-bold text-primary dark:text-blue-400 mb-4">{t('user.code.title')}</h2>
-        <div className="bg-white dark:bg-gray-800 rounded shadow border dark:border-gray-700 transition-colors duration-200">
-          <table className="min-w-full">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-primary dark:text-blue-400">{t('user.code.title')}</h2>
+          <Link 
+            to="/submissions" 
+            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors shadow-sm"
+          >
+            {t('submission.list.title')}
+          </Link>
+        </div>
+        <div className="bg-surface dark:bg-surface-dark rounded-xl shadow-card border border-gray-100 dark:border-gray-700 transition-colors duration-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
             <thead>
               <tr className="bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300">
                 <th className="px-4 py-2 text-left">{t('user.code.columns.time')}</th>
@@ -66,8 +76,9 @@ function UserCode() {
           {loading && <div className="p-4 text-center text-gray-500 dark:text-gray-400">{t('common.loading')}</div>}
         </div>
       </div>
-    </PageTransition>
-  );
+    </div>
+  </PageTransition>
+);
 }
 
 export default UserCode;

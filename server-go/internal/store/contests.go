@@ -65,6 +65,7 @@ type ContestPublicListItem struct {
 	Rule             string    `json:"rule"`
 	ParticipantCount int       `json:"participantCount"`
 	HasPassword      bool      `json:"hasPassword"`
+	Joined           bool      `json:"joined"`
 }
 
 type ContestPublicDetail struct {
@@ -345,7 +346,7 @@ type ContestPublicFilter struct {
 	Now       time.Time
 }
 
-func (s *Store) ListPublishedContestsPaged(ctx context.Context, f ContestPublicFilter, page int, pageSize int) ([]ContestPublicListItem, int, error) {
+func (s *Store) ListPublishedContestsPaged(ctx context.Context, f ContestPublicFilter, userID int, page int, pageSize int) ([]ContestPublicListItem, int, error) {
 	if page <= 0 {
 		page = 1
 	}
@@ -362,19 +363,24 @@ func (s *Store) ListPublishedContestsPaged(ctx context.Context, f ContestPublicF
 		return nil, 0, err
 	}
 
+	baseLen := len(args)
 	argsWithPage := append([]any{}, args...)
-	argsWithPage = append(argsWithPage, pageSize, offset)
+	argsWithPage = append(argsWithPage, pageSize, offset, userID)
 
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT c."id",c."name",c."description",c."startTime",c."endTime",c."rule",
 		       COUNT(p."id") as "participantCount",
-		       (c."passwordHash" IS NOT NULL) as "hasPassword"
+		       (c."passwordHash" IS NOT NULL) as "hasPassword",
+		       EXISTS(
+		         SELECT 1 FROM "ContestParticipant" p2
+		         WHERE p2."contestId"=c."id" AND p2."userId"=$`+itoa(baseLen+3)+`
+		       ) as "joined"
 		FROM "Contest" c
 		LEFT JOIN "ContestParticipant" p ON p."contestId"=c."id"
 		`+where+`
 		GROUP BY c."id"
 		ORDER BY c."startTime" DESC
-		LIMIT $`+itoa(len(args)+1)+` OFFSET $`+itoa(len(args)+2)+`
+		LIMIT $`+itoa(baseLen+1)+` OFFSET $`+itoa(baseLen+2)+`
 	`, argsWithPage...)
 	if err != nil {
 		return nil, 0, err
@@ -384,7 +390,7 @@ func (s *Store) ListPublishedContestsPaged(ctx context.Context, f ContestPublicF
 	var out []ContestPublicListItem
 	for rows.Next() {
 		var item ContestPublicListItem
-		if err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.StartTime, &item.EndTime, &item.Rule, &item.ParticipantCount, &item.HasPassword); err != nil {
+		if err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.StartTime, &item.EndTime, &item.Rule, &item.ParticipantCount, &item.HasPassword, &item.Joined); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, item)
@@ -392,18 +398,24 @@ func (s *Store) ListPublishedContestsPaged(ctx context.Context, f ContestPublicF
 	return out, total, rows.Err()
 }
 
-func (s *Store) ListPublishedContestsAll(ctx context.Context, f ContestPublicFilter, minParticipants int, maxParticipants int, page int, pageSize int) ([]ContestPublicListItem, int, error) {
+func (s *Store) ListPublishedContestsAll(ctx context.Context, f ContestPublicFilter, userID int, minParticipants int, maxParticipants int, page int, pageSize int) ([]ContestPublicListItem, int, error) {
 	where, args := buildContestPublicWhere(f)
+	argsWithUser := append([]any{}, args...)
+	argsWithUser = append(argsWithUser, userID)
+
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT c."id",c."name",c."description",c."startTime",c."endTime",c."rule",
 		       COUNT(p."id") as "participantCount",
-		       (c."passwordHash" IS NOT NULL) as "hasPassword"
+		       (c."passwordHash" IS NOT NULL) as "hasPassword",
+		       EXISTS(
+		         SELECT 1 FROM "ContestParticipant" p2
+		         WHERE p2."contestId"=c."id" AND p2."userId"=$`+itoa(len(args)+1)+`
+		       ) as "joined"
 		FROM "Contest" c
 		LEFT JOIN "ContestParticipant" p ON p."contestId"=c."id"
 		`+where+`
 		GROUP BY c."id"
-		ORDER BY c."startTime" DESC
-	`, args...)
+	`, argsWithUser...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -412,7 +424,7 @@ func (s *Store) ListPublishedContestsAll(ctx context.Context, f ContestPublicFil
 	var all []ContestPublicListItem
 	for rows.Next() {
 		var item ContestPublicListItem
-		if err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.StartTime, &item.EndTime, &item.Rule, &item.ParticipantCount, &item.HasPassword); err != nil {
+		if err := rows.Scan(&item.ID, &item.Name, &item.Description, &item.StartTime, &item.EndTime, &item.Rule, &item.ParticipantCount, &item.HasPassword, &item.Joined); err != nil {
 			return nil, 0, err
 		}
 		all = append(all, item)

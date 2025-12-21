@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 
 const API_URL = '/api';
 
@@ -72,97 +76,104 @@ function ProblemList() {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6 text-primary border-b-4 border-secondary inline-block pb-1">{t('problem.list.title')}</h2>
+      <h2 className="text-3xl font-bold mb-6 text-primary dark:text-blue-400">{t('problem.list.title')}</h2>
       
-      <div className="mb-6 flex flex-col md:flex-row gap-4">
-        <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('problem.list.searchPlaceholder')}
-            className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button type="submit" className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors">
-            {t('common.search')}
-          </button>
-        </form>
-        
-        <select
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-          className="border border-gray-300 p-2 rounded focus:ring-2 focus:ring-primary focus:outline-none"
-        >
-          <option value="">{t('problem.list.allDifficulties')}</option>
-          <option value="LEVEL1">{t('problem.difficulty.LEVEL1')}</option>
-          <option value="LEVEL2">{t('problem.difficulty.LEVEL2')}</option>
-          <option value="LEVEL3">{t('problem.difficulty.LEVEL3')}</option>
-          <option value="LEVEL4">{t('problem.difficulty.LEVEL4')}</option>
-          <option value="LEVEL5">{t('problem.difficulty.LEVEL5')}</option>
-          <option value="LEVEL6">{t('problem.difficulty.LEVEL6')}</option>
-          <option value="LEVEL7">{t('problem.difficulty.LEVEL7')}</option>
-        </select>
-      </div>
+      <Card className="mb-6 p-4">
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+          <form onSubmit={handleSearch} className="flex-1 flex gap-2 items-end">
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('problem.list.searchPlaceholder')}
+              fullWidth
+              className="flex-1"
+            />
+            <Button type="submit" variant="primary">
+              {t('common.search')}
+            </Button>
+          </form>
+          
+          <div className="w-full md:w-48">
+            <Select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              fullWidth
+              options={[
+                { value: '', label: t('problem.list.allDifficulties') },
+                { value: 'LEVEL1', label: t('problem.difficulty.LEVEL1') },
+                { value: 'LEVEL2', label: t('problem.difficulty.LEVEL2') },
+                { value: 'LEVEL3', label: t('problem.difficulty.LEVEL3') },
+                { value: 'LEVEL4', label: t('problem.difficulty.LEVEL4') },
+                { value: 'LEVEL5', label: t('problem.difficulty.LEVEL5') },
+                { value: 'LEVEL6', label: t('problem.difficulty.LEVEL6') },
+                { value: 'LEVEL7', label: t('problem.difficulty.LEVEL7') },
+              ]}
+            />
+          </div>
+        </div>
+      </Card>
 
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-200">
-        <table className="min-w-full leading-normal">
-          <thead>
-            <tr>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-20">
-                {t('problem.list.id')}
-              </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                {t('problem.list.problemTitle')}
-              </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-32">
-                {t('problem.list.difficulty')}
-              </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-24">
-                {t('problem.list.score')}
-              </th>
-              <th className="px-5 py-3 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-40">
-                {t('problem.list.createdAt')}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {problems.map(problem => (
-              <tr key={problem.id} className="hover:bg-yellow-50 dark:hover:bg-gray-700 transition-colors">
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100">
-                  {problem.id}
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-primary dark:text-blue-400">
-                  <Link to={`/problem/${problem.id}`} className="hover:underline block">
-                    {problem.title}
-                  </Link>
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold" style={badgeStyle(problem.difficulty)}>
-                    {t(`problem.difficulty.${problem.difficulty || 'LEVEL2'}`)}
-                  </span>
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm font-semibold">
-                  {problem.score !== undefined ? (
-                    <span className={problem.score === 100 ? "text-green-600 dark:text-green-400" : "text-gray-900 dark:text-gray-100"}>
-                      {problem.score}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
-                </td>
-                <td className="px-5 py-5 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-                  {new Date(problem.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-            {problems.length === 0 && (
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full leading-normal">
+            <thead>
               <tr>
-                <td colSpan="5" className="px-5 py-5 text-center text-gray-500 dark:text-gray-400">{t('problem.list.noProblems')}</td>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                  {t('problem.list.id')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('problem.list.problemTitle')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
+                  {t('problem.list.difficulty')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                  {t('problem.list.score')}
+                </th>
+                <th className="px-6 py-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
+                  {t('problem.list.createdAt')}
+                </th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {problems.map(problem => (
+                <tr key={problem.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100">
+                    {problem.id}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-primary dark:text-blue-400">
+                    <Link to={`/problem/${problem.id}`} className="hover:underline block">
+                      {problem.title}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm">
+                    <span className="px-2.5 py-1 rounded-md text-xs font-semibold" style={badgeStyle(problem.difficulty)}>
+                      {t(`problem.difficulty.${problem.difficulty || 'LEVEL2'}`)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm font-semibold">
+                    {problem.score !== undefined ? (
+                      <span className={problem.score === 100 ? "text-success" : "text-gray-900 dark:text-gray-100"}>
+                        {problem.score}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(problem.createdAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+              {problems.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">{t('problem.list.noProblems')}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }
